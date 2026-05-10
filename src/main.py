@@ -125,7 +125,9 @@ def render_comments():
             firebase_service.add_rating("anonymous@user.com", actual_rating)
             st.session_state.last_submitted_rating = actual_rating
             st.success(f"Cảm ơn bạn đã đánh giá {actual_rating} sao!")
-
+            time.sleep(0.5)
+            st.rerun()
+            
     # 2. Hiển thị điểm trung bình
     # Lấy điểm trực tiếp từ Firebase để đảm bảo tính thời gian thực
     avg_rating = firebase_service.get_average_rating()
@@ -449,7 +451,7 @@ def render_results():
                         user_input=res['params'],
                         generated_outline=outline
                     )
-
+                    
         if "proposal_outline" in st.session_state:
             st.markdown("---")
             st.subheader(f"📄 Bản đề cương tham khảo: {st.session_state.selected_research_title}")
