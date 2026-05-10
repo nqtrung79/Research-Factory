@@ -12,32 +12,32 @@ class FirebaseService:
         self._initialize()
 
     def _initialize(self):
-    try:
-        if not firebase_admin._apps:
-            if "firebase" in st.secrets:
-                # Chuyển Secrets sang Dictionary
-                fb_dict = dict(st.secrets["firebase"])
-                
-                # CÂU LỆNH CỨU CÁNH: Sửa lỗi ký tự xuống dòng
-                fb_dict["private_key"] = fb_dict["private_key"].replace("\\n", "\n")
-                
-                cred = credentials.Certificate(fb_dict)
-                firebase_admin.initialize_app(cred)
-            else:
-                # Nếu chạy local tìm file JSON
-                config_path = "firebase-applet-config.json"
-                if os.path.exists(config_path):
-                    cred = credentials.Certificate(config_path)
+        try:
+            if not firebase_admin._apps:
+                # Kiểm tra Secrets của Streamlit
+                import streamlit as st
+                if "firebase" in st.secrets:
+                    fb_dict = dict(st.secrets["firebase"])
+                    # Sửa lỗi ký tự xuống dòng
+                    fb_dict["private_key"] = fb_dict["private_key"].replace("\\n", "\n")
+                    
+                    cred = credentials.Certificate(fb_dict)
                     firebase_admin.initialize_app(cred)
                 else:
-                    firebase_admin.initialize_app()
-        
-        # Luôn khởi tạo client sau khi đã có app
-        self.db = firestore.client()
-        logger.info("🔥 Kết nối Firebase thành công!")
-    except Exception as e:
-        logger.error(f"❌ Lỗi khởi tạo Firebase: {e}")
-        self.db = None
+                    # Nếu chạy local tìm file JSON
+                    config_path = "firebase-applet-config.json"
+                    if os.path.exists(config_path):
+                        cred = credentials.Certificate(config_path)
+                        firebase_admin.initialize_app(cred)
+                    else:
+                        firebase_admin.initialize_app()
+            
+            # Khởi tạo client
+            self.db = firestore.client()
+            logger.info("🔥 Kết nối Firebase thành công!")
+        except Exception as e:
+            logger.error(f"❌ Lỗi khởi tạo Firebase: {e}")
+            self.db = None
 
     def add_comment(self, email, name, content, parent_id=None, is_bot=False):
         if not self.db: return None
