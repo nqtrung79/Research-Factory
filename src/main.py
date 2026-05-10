@@ -121,10 +121,17 @@ def render_comments():
     key="rating_star",
     on_change=None # Để nó không tự động rerun khi chưa nhấn nút
 )
-        rating = st_star_rating("Bạn đánh giá thế nào?", maxValue=5, defaultValue=5, key="rating")
-        if st.button("Gửi đánh giá"):
-            firebase_service.add_rating("anonymous@user.com", rating)
-            st.success("Cảm ơn bạn đã đánh giá!")
+# Cách làm bộ chọn sao không cần thư viện ngoài
+st.write("#### Bạn đánh giá thế nào về trợ lý này?")
+rating_emoji = st.feedback("stars") # Đây là tính năng mới cực xịn của Streamlit
+
+if rating_emoji is not None:
+    # rating_emoji trả về từ 0 đến 4, ta cộng thêm 1 để thành 1-5 sao
+    actual_rating = rating_emoji + 1
+    if st.button("Gửi đánh giá"):
+        firebase_service.add_rating("anonymous@user.com", actual_rating)
+        st.session_state.has_rated = True
+        st.success(f"Cảm ơn bạn đã đánh giá {actual_rating} sao!")
     
     avg_rating = firebase_service.get_average_rating()
     st.caption(f"⭐ Đánh giá trung bình: {avg_rating:.1f}/5")
