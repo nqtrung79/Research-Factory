@@ -27,7 +27,7 @@ class FirebaseService:
                 # CRITICAL: Use the specific database ID from the config
                 db_id = config.get('firestoreDatabaseId')
                 if db_id:
-                    self.db = firestore.client(database=db_id)
+                    self.db = firestore.client(database_id=db_id)
                 else:
                     self.db = firestore.client()
             else:
