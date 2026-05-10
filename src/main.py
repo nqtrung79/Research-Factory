@@ -15,6 +15,12 @@ from services.firebase_service import firebase_service
 from services.groq_bot_service import groq_bot
 from utils.spam_check import is_spam
 
+# Thêm đường dẫn thư mục src vào hệ thống
+file_path = Path(__file__).resolve()
+root_path = file_path.parent
+if str(root_path) not in sys.path:
+    sys.path.append(str(root_path))
+    
 # Page configuration
 st.set_page_config(
     page_title="V-Scholar Research Assistant",
