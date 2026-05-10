@@ -502,3 +502,12 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# Kiểm tra xem có phải là bot đang gọi không thông qua URL
+query_params = st.query_params
+if query_params.get("action") == "bot_comment":
+    new_comment = groq_bot.generate_random_comment()
+    # Gọi hàm lưu vào Firebase của bạn ở đây
+    firebase_service.add_comment("V-Scholar Bot", new_comment)
+    st.write("Bot đã viết comment thành công!")
+    st.stop() # Dừng app tại đây để tiết kiệm tài nguyên
