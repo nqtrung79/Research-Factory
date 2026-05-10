@@ -16,7 +16,6 @@ from services.firebase_service import firebase_service
 from services.groq_bot_service import groq_bot
 from utils.spam_check import is_spam
 from utils.export_handler import markdown_to_docx
-from streamlit_star_rating import st_star_rating
 
 # Page configuration
 st.set_page_config(
