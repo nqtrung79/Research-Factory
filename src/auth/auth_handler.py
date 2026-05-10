@@ -33,7 +33,7 @@ class AuthHandler:
         if cursor.fetchone()[0] == 0:
             logger.info("No users found in database. Creating default admin user.")
             # Use stauth.Hasher to hash the password
-            hashed_pw = stauth.Hasher(['admin123']).generate()[0]
+            hashed_pw = stauth.Hasher.hash('admin123')
             cursor.execute(
                 "INSERT INTO users (username, name, password, email) VALUES (?, ?, ?, ?)",
                 ("admin", "Administrator", hashed_pw, "admin@vscholar.edu.vn")
@@ -154,7 +154,7 @@ class AuthHandler:
 
     def _save_user(self, username, name, password, email):
         """Saves a new user to the SQLite database."""
-        hashed_pw = stauth.Hasher([password]).generate()[0]
+        hashed_pw = stauth.Hasher.hash(password)
         try:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
