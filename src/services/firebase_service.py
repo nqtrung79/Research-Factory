@@ -12,28 +12,32 @@ class FirebaseService:
         self._initialize()
 
     def _initialize(self):
-        try:
-            # We assume firebase-applet-config.json exists after set_up_firebase
-            config_path = "firebase-applet-config.json"
-            if os.path.exists(config_path):
-                with open(config_path) as f:
-                    config = json.load(f)
+    try:
+        if not firebase_admin._apps:
+            if "firebase" in st.secrets:
+                # Chuyển Secrets sang Dictionary
+                fb_dict = dict(st.secrets["firebase"])
                 
-                if not firebase_admin._apps:
-                    firebase_admin.initialize_app(options={
-                        'projectId': config.get('projectId')
-                    })
+                # CÂU LỆNH CỨU CÁNH: Sửa lỗi ký tự xuống dòng
+                fb_dict["private_key"] = fb_dict["private_key"].replace("\\n", "\n")
                 
-                # CRITICAL: Use the specific database ID from the config
-                db_id = config.get('firestoreDatabaseId')
-                if db_id:
-                    self.db = firestore.client(database_id=db_id)
-                else:
-                    self.db = firestore.client()
+                cred = credentials.Certificate(fb_dict)
+                firebase_admin.initialize_app(cred)
             else:
-                logger.warning("Firebase config not found. Comments will not be saved.")
-        except Exception as e:
-            logger.error(f"Failed to initialize Firebase: {e}")
+                # Nếu chạy local tìm file JSON
+                config_path = "firebase-applet-config.json"
+                if os.path.exists(config_path):
+                    cred = credentials.Certificate(config_path)
+                    firebase_admin.initialize_app(cred)
+                else:
+                    firebase_admin.initialize_app()
+        
+        # Luôn khởi tạo client sau khi đã có app
+        self.db = firestore.client()
+        logger.info("🔥 Kết nối Firebase thành công!")
+    except Exception as e:
+        logger.error(f"❌ Lỗi khởi tạo Firebase: {e}")
+        self.db = None
 
     def add_comment(self, email, name, content, parent_id=None, is_bot=False):
         if not self.db: return None
