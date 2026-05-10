@@ -1,6 +1,7 @@
 import streamlit as st
 import time
 import random
+import uuid
 from datetime import datetime, timedelta
 from loguru import logger
 from auth.auth_handler import auth_handler
@@ -10,19 +11,12 @@ from models.research_models import ResearchLevel, ProjectBudget
 from search.crossref_search import crossref_searcher
 from search.duckduckgo_search import duckduckgo_searcher
 from api.gemini_client import gemini_client
-from utils.pdf_processor import extract_abstract_from_pdf
-from services.firebase_service import firebase_service
-from services.groq_bot_service import groq_bot
-from utils.spam_check import is_spam
-from pathlib import Path
-import sys
+from src.utils.pdf_processor import extract_abstract_from_pdf
+from src.services.firebase_service import firebase_service
+from src.services.groq_bot_service import groq_bot
+from src.utils.spam_check import is_spam
+from src.utils.export_handler import markdown_to_docx
 
-# Thêm đường dẫn thư mục src vào hệ thống
-file_path = Path(__file__).resolve()
-root_path = file_path.parent
-if str(root_path) not in sys.path:
-    sys.path.append(str(root_path))
-    
 # Page configuration
 st.set_page_config(
     page_title="V-Scholar Research Assistant",
@@ -82,6 +76,8 @@ def initialize_session():
         st.session_state.has_commented = False
     if "last_bot_check" not in st.session_state:
         st.session_state.last_bot_check = datetime.now()
+    if "session_id" not in st.session_state:
+        st.session_state.session_id = str(uuid.uuid4())
 
 def handle_bot_activity():
     """Simulates background bot activity."""
@@ -433,6 +429,15 @@ def render_results():
                     outline = gemini_client.generate_proposal_outline(selected_title, res['params'])
                     st.session_state.proposal_outline = outline
                     st.session_state.selected_research_title = selected_title
+                    
+                    # 3. Log User Journey
+                    user_email = st.session_state.get("user_email", "anonymous@user.com")
+                    firebase_service.log_user_journey(
+                        session_id=st.session_state.session_id,
+                        user_email=user_email,
+                        user_input=res['params'],
+                        generated_outline=outline
+                    )
 
         if "proposal_outline" in st.session_state:
             st.markdown("---")
@@ -444,12 +449,13 @@ def render_results():
             if not (st.session_state.has_rated and st.session_state.has_commented):
                 st.warning("⚠️ Vui lòng đánh giá 5 sao và để lại bình luận góp ý ở cuối trang để mở khóa tính năng tải xuống đề cương.")
             else:
-                st.success("✅ Tuyệt vời! Bạn đã có thể tải xuống đề cương dưới dạng file văn bản.")
+                st.success("✅ Tuyệt vời! Bạn đã có thể tải xuống đề cương dưới dạng file chuyên nghiệp.")
+                docx_data = markdown_to_docx(st.session_state.proposal_outline)
                 st.download_button(
-                    label="💾 Tải xuống Đề cương (.txt)",
-                    data=st.session_state.proposal_outline,
-                    file_name=f"De_cuong_{st.session_state.selected_research_title.replace(' ', '_')}.txt",
-                    mime="text/plain"
+                    label="💾 Tải xuống Đề cương (.docx)",
+                    data=docx_data,
+                    file_name=f"De_cuong_{st.session_state.selected_research_title.replace(' ', '_')}.docx",
+                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                 )
 
     with tab_literature:
@@ -502,12 +508,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-# Kiểm tra xem có phải là bot đang gọi không thông qua URL
-query_params = st.query_params
-if query_params.get("action") == "bot_comment":
-    new_comment = groq_bot.generate_random_comment()
-    # Gọi hàm lưu vào Firebase của bạn ở đây
-    firebase_service.add_comment("V-Scholar Bot", new_comment)
-    st.write("Bot đã viết comment thành công!")
-    st.stop() # Dừng app tại đây để tiết kiệm tài nguyên
