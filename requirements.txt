@@ -28,6 +28,7 @@ python-dateutil
 # Auth
 streamlit-authenticator
 bcrypt
+firebase-admin
 
 # Logging
 loguru
