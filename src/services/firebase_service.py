@@ -16,15 +16,20 @@ class FirebaseService:
             # We assume firebase-applet-config.json exists after set_up_firebase
             config_path = "firebase-applet-config.json"
             if os.path.exists(config_path):
-                # For admin SDK in this environment, we might need to handle credentials
-                # However, if we are in a container with default service account, it might work.
-                # If not, we use the client SDK or initialize with nothing if locally available.
+                with open(config_path) as f:
+                    config = json.load(f)
+                
                 if not firebase_admin._apps:
-                    # In AI Studio, we often use the project ID from config
-                    with open(config_path) as f:
-                        config = json.load(f)
-                    firebase_admin.initialize_app()
-                self.db = firestore.client()
+                    firebase_admin.initialize_app(options={
+                        'projectId': config.get('projectId')
+                    })
+                
+                # CRITICAL: Use the specific database ID from the config
+                db_id = config.get('firestoreDatabaseId')
+                if db_id:
+                    self.db = firestore.client(database=db_id)
+                else:
+                    self.db = firestore.client()
             else:
                 logger.warning("Firebase config not found. Comments will not be saved.")
         except Exception as e:
@@ -50,8 +55,13 @@ class FirebaseService:
     def get_comments(self):
         if not self.db: return []
         try:
-            # We add a check for existence and ensure it returns a list
-            docs = self.db.collection("comments").order_by("timestamp", direction=firestore.Query.ASCENDING).stream()
+            # Attempt to fetch with server-side ordering
+            try:
+                docs = self.db.collection("comments").order_by("timestamp", direction=firestore.Query.ASCENDING).stream()
+            except Exception as e:
+                logger.warning(f"Server-side ordering failed: {e}. Falling back to client-side sort.")
+                docs = self.db.collection("comments").stream()
+
             comments_list = []
             for doc in docs:
                 d = doc.to_dict()
@@ -59,14 +69,18 @@ class FirebaseService:
                 # Handle Firestore Timestamps correctly
                 if "timestamp" in d and d["timestamp"] is not None:
                     try:
+                        # If it's a Firestore Timestamp object
                         d["timestamp"] = d["timestamp"].isoformat()
                     except AttributeError:
                         # If it's already a string or something else
                         d["timestamp"] = str(d["timestamp"])
                 else:
+                    # Fallback for missing timestamp
                     d["timestamp"] = datetime.now().isoformat()
                 comments_list.append(d)
-            return comments_list
+            
+            # Ensure consistent order even if server-side ordering failed
+            return sorted(comments_list, key=lambda x: x.get('timestamp', ''))
         except Exception as e:
             logger.error(f"Error fetching comments: {e}")
             return []
@@ -89,7 +103,12 @@ class FirebaseService:
         if not self.db: return 0.0
         try:
             docs = self.db.collection("ratings").stream()
-            ratings = [d.to_dict()["stars"] for d in docs]
+            ratings = []
+            for d in docs:
+                data = d.to_dict()
+                if data and "stars" in data:
+                    ratings.append(float(data["stars"]))
+            
             if not ratings: return 0.0
             return sum(ratings) / len(ratings)
         except Exception as e:
