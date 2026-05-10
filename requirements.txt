@@ -30,7 +30,6 @@ python-docx
 streamlit-authenticator
 bcrypt
 firebase-admin
-streamlit-star-rating
 
 # Logging
 loguru
