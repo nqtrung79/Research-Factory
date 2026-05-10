@@ -1,0 +1,41 @@
+{
+  "entities": {
+    "Comment": {
+      "title": "Application Comment",
+      "description": "User comments on the V-Scholar application.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "user_email": { "type": "string", "format": "email" },
+        "user_name": { "type": "string" },
+        "content": { "type": "string" },
+        "parent_id": { "type": "string", "description": "ID of the parent comment for replies" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "is_bot": { "type": "boolean" },
+        "likes": { "type": "integer" }
+      },
+      "required": ["user_email", "content", "timestamp"]
+    },
+    "Rating": {
+      "title": "Application Rating",
+      "description": "User ratings (1-5 stars) for the application.",
+      "type": "object",
+      "properties": {
+        "user_email": { "type": "string", "format": "email" },
+        "stars": { "type": "integer", "description": "1 to 5" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["user_email", "stars", "timestamp"]
+    }
+  },
+  "firestore": {
+    "comments": {
+      "schema": "Comment",
+      "description": "Collection of all comments and replies."
+    },
+    "ratings": {
+      "schema": "Rating",
+      "description": "Collection of user ratings."
+    }
+  }
+}

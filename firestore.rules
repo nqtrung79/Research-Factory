@@ -1,0 +1,44 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidComment(data) {
+      return data.user_email is string && data.user_email.size() <= 256
+          && data.content is string && data.content.size() <= 2000
+          && data.timestamp is timestamp;
+    }
+
+    function isValidRating(data) {
+      return data.user_email is string && data.stars is int 
+          && data.stars >= 1 && data.stars <= 5
+          && data.timestamp is timestamp;
+    }
+
+    // Public can write comments if they provide valid data
+    // We restrict reads to preventing massive scraping if possible, 
+    // but for a comment section, read is usually public.
+    match /comments/{commentId} {
+      allow read: if true;
+      allow create: if isValidComment(request.resource.data) && isValidId(commentId);
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes'])
+                    || (request.auth != null && request.auth.token.email_verified == true);
+    }
+
+    match /ratings/{ratingId} {
+      allow read: if true;
+      allow create: if isValidRating(request.resource.data) && isValidId(ratingId);
+    }
+  }
+}
