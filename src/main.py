@@ -150,6 +150,8 @@ def render_comments():
                     firebase_service.add_comment(user_email, user_name or "Người dùng ẩn danh", comment_text)
                     st.session_state.has_commented = True
                     st.success("Bình luận của bạn đã được gửi!")
+                    st.write("Đã nhấn nút gửi!") # Dòng này để test trên màn hình
+                    print("LOG: User nhan nut gui binh luan") # Dòng này để test trên Logs
                     st.rerun()
 
     # Display Comments
