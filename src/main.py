@@ -19,7 +19,7 @@ from utils.export_handler import markdown_to_docx
 
 # Page configuration
 st.set_page_config(
-    page_title="V-Scholar Research Assistant",
+    page_title="Ứng dụng viết đề cương",
     page_icon="🎓",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -216,8 +216,8 @@ def render_comments():
                             st.rerun()
 
 def render_landing_page():
-    st.markdown('<h1 class="main-header">Chào mừng đến với V-Scholar 🎓</h1>', unsafe_allow_html=True)
-    st.markdown('<p class="sub-header">Hãy lựa chọn một mục dưới đây để tôi có thể giúp gợi ý đề tài và xây dựng đề cương nghiên cứu..</p>', unsafe_allow_html=True)
+    st.markdown('<h1 class="main-header">Ứng dụng viết đề cương nghiên cứu 🎓</h1>', unsafe_allow_html=True)
+    st.markdown('<p class="sub-header">Hãy lựa chọn một mục dưới đây để gợi ý đề tài và xây dựng đề cương nghiên cứu..</p>', unsafe_allow_html=True)
     
     st.divider()
     
