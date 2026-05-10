@@ -1,8 +1,8 @@
 name: Wake Up V-Scholar Bot
 on:
   schedule:
-    - cron: '0 * * * *'  # Chạy đúng 1 tiếng một lần (vào phút thứ 0)
-  workflow_dispatch:      # Cho phép bạn nhấn nút chạy thử bằng tay
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
 
 jobs:
   wake_up:
@@ -10,4 +10,5 @@ jobs:
     steps:
       - name: Ping Streamlit App
         run: |
-          curl -L "https://research-factory.streamlit.app/?action=bot_comment"
+          curl -I -L -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" \
+          "https://research-factory.streamlit.app/?action=bot_comment"
