@@ -14,6 +14,7 @@ from utils.pdf_processor import extract_abstract_from_pdf
 from services.firebase_service import firebase_service
 from services.groq_bot_service import groq_bot
 from utils.spam_check import is_spam
+from pathlib import Path
 
 # Thêm đường dẫn thư mục src vào hệ thống
 file_path = Path(__file__).resolve()
