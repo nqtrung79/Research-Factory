@@ -1,0 +1,13 @@
+name: Wake Up V-Scholar Bot
+on:
+  schedule:
+    - cron: '0 * * * *'  # Chạy đúng 1 tiếng một lần (vào phút thứ 0)
+  workflow_dispatch:      # Cho phép bạn nhấn nút chạy thử bằng tay
+
+jobs:
+  wake_up:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Streamlit App
+        run: |
+          curl -L "https://research-factory.streamlit.app/?action=bot_comment"
