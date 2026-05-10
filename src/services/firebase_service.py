@@ -50,15 +50,23 @@ class FirebaseService:
     def get_comments(self):
         if not self.db: return []
         try:
+            # We add a check for existence and ensure it returns a list
             docs = self.db.collection("comments").order_by("timestamp", direction=firestore.Query.ASCENDING).stream()
-            comments = []
+            comments_list = []
             for doc in docs:
                 d = doc.to_dict()
-                # Convert timestamp to string if needed
-                if "timestamp" in d and d["timestamp"]:
-                    d["timestamp"] = d["timestamp"].isoformat()
-                comments.append(d)
-            return comments
+                if not d: continue
+                # Handle Firestore Timestamps correctly
+                if "timestamp" in d and d["timestamp"] is not None:
+                    try:
+                        d["timestamp"] = d["timestamp"].isoformat()
+                    except AttributeError:
+                        # If it's already a string or something else
+                        d["timestamp"] = str(d["timestamp"])
+                else:
+                    d["timestamp"] = datetime.now().isoformat()
+                comments_list.append(d)
+            return comments_list
         except Exception as e:
             logger.error(f"Error fetching comments: {e}")
             return []
@@ -92,5 +100,26 @@ class FirebaseService:
         if not self.db: return
         doc_ref = self.db.collection("comments").document(comment_id)
         doc_ref.update({"likes": firestore.Increment(1)})
+
+    def log_user_journey(self, session_id, user_email, user_input, generated_outline):
+        """Logs the entire user journey from input to outline."""
+        if not self.db: return False
+        try:
+            journey_id = str(uuid.uuid4())
+            data = {
+                "session_id": session_id,
+                "user_email": user_email,
+                "user_input": user_input, # Should be a serializable dict
+                "generated_outline": generated_outline,
+                "timestamp": firestore.SERVER_TIMESTAMP,
+                # Optimization for searching
+                "topic": user_input.get("existing_title") or user_input.get("object", "N/A"),
+                "level": user_input.get("level", "N/A")
+            }
+            self.db.collection("user_journeys").document(journey_id).set(data)
+            return True
+        except Exception as e:
+            logger.error(f"Error logging journey: {e}")
+            return False
 
 firebase_service = FirebaseService()
