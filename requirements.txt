@@ -24,6 +24,7 @@ PyPDF2
 pydantic
 pydantic-settings
 python-dateutil
+python-docx
 
 # Auth
 streamlit-authenticator
