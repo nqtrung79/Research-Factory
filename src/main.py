@@ -10,10 +10,10 @@ from models.research_models import ResearchLevel, ProjectBudget
 from search.crossref_search import crossref_searcher
 from search.duckduckgo_search import duckduckgo_searcher
 from api.gemini_client import gemini_client
-from src.utils.pdf_processor import extract_abstract_from_pdf
-from src.services.firebase_service import firebase_service
-from src.services.groq_bot_service import groq_bot
-from src.utils.spam_check import is_spam
+from utils.pdf_processor import extract_abstract_from_pdf
+from services.firebase_service import firebase_service
+from services.groq_bot_service import groq_bot
+from utils.spam_check import is_spam
 
 # Page configuration
 st.set_page_config(
