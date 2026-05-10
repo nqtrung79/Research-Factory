@@ -101,7 +101,9 @@ def handle_bot_activity():
             logger.info(f"Bot replied to comment {target['id']}")
 
         # Action 2: Random new comment if long time no activity
-        if not comments or (now - datetime.fromisoformat(comments[-1]["timestamp"])).total_seconds() > 3600:
+        # if not comments or (now - datetime.fromisoformat(comments[-1]["timestamp"])).total_seconds() > 3600:
+        # Sửa dòng 104 trong main.py
+        if not comments or (now.replace(tzinfo=None) - datetime.fromisoformat(comments[-1]["timestamp"].replace('Z', '+00:00')).replace(tzinfo=None)).total_seconds() > 3600:
             content = groq_bot.generate_random_comment()
             firebase_service.add_comment("bot@vscholar.ai", "V-Scholar Bot", content, is_bot=True)
             logger.info("Bot posted a random comment.")
