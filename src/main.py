@@ -16,6 +16,7 @@ from services.firebase_service import firebase_service
 from services.groq_bot_service import groq_bot
 from utils.spam_check import is_spam
 from utils.export_handler import markdown_to_docx
+from streamlit_star_rating import st_star_rating
 
 # Page configuration
 st.set_page_config(
@@ -114,10 +115,16 @@ def render_comments():
     st.write("#### Bạn đánh giá thế nào về trợ lý này?")
     c1, c2 = st.columns([1, 3])
     with c1:
-        rating = st.select_slider("Số sao", options=[1, 2, 3, 4, 5], value=5)
+        rating = st_star_rating(
+    label="Số sao", 
+    maxValue=5, 
+    defaultValue=5, 
+    key="rating_star",
+    on_change=None # Để nó không tự động rerun khi chưa nhấn nút
+)
+        rating = st_star_rating("Bạn đánh giá thế nào?", maxValue=5, defaultValue=5, key="rating")
         if st.button("Gửi đánh giá"):
             firebase_service.add_rating("anonymous@user.com", rating)
-            st.session_state.has_rated = True
             st.success("Cảm ơn bạn đã đánh giá!")
     
     avg_rating = firebase_service.get_average_rating()
