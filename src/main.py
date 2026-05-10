@@ -110,31 +110,27 @@ def render_comments():
     st.write("---")
     st.subheader("💬 Cộng đồng V-Scholar")
     
-    # Rating UI
+    # 1. Rating UI
     st.write("#### Bạn đánh giá thế nào về trợ lý này?")
-    c1, c2 = st.columns([1, 3])
-    with c1:
-        rating = st_star_rating(
-    label="Số sao", 
-    maxValue=5, 
-    defaultValue=5, 
-    key="rating_star",
-    on_change=None # Để nó không tự động rerun khi chưa nhấn nút
-)
-# Cách làm bộ chọn sao không cần thư viện ngoài
-st.write("#### Bạn đánh giá thế nào về trợ lý này?")
-rating_emoji = st.feedback("stars") # Đây là tính năng mới cực xịn của Streamlit
-
-if rating_emoji is not None:
-    # rating_emoji trả về từ 0 đến 4, ta cộng thêm 1 để thành 1-5 sao
-    actual_rating = rating_emoji + 1
-    if st.button("Gửi đánh giá"):
-        firebase_service.add_rating("anonymous@user.com", actual_rating)
-        st.session_state.has_rated = True
-        st.success(f"Cảm ơn bạn đã đánh giá {actual_rating} sao!")
     
+    # Sử dụng st.feedback đơn lẻ (không cần button "Gửi đánh giá" vì bấm sao là ăn ngay)
+    rating_index = st.feedback("stars", key="main_rating")
+
+    if rating_index is not None:
+        # Chuyển từ index 0-4 sang 1-5 sao
+        actual_rating = rating_index + 1
+        
+        # Chỉ gửi lên Firebase một lần (dùng session_state để chặn gửi liên tục)
+        if st.session_state.get("last_submitted_rating") != actual_rating:
+            firebase_service.add_rating("anonymous@user.com", actual_rating)
+            st.session_state.last_submitted_rating = actual_rating
+            st.success(f"Cảm ơn bạn đã đánh giá {actual_rating} sao!")
+
+    # 2. Hiển thị điểm trung bình
+    # Lấy điểm trực tiếp từ Firebase để đảm bảo tính thời gian thực
     avg_rating = firebase_service.get_average_rating()
-    st.caption(f"⭐ Đánh giá trung bình: {avg_rating:.1f}/5")
+    st.caption(f"⭐ Đánh giá trung bình hiện tại: {avg_rating:.1f}/5")
+    
 
     # Comment Form
     st.write("#### Thảo luận & Góp ý")
