@@ -565,7 +565,7 @@ def render_library():
     raw_data = get_cached_library() 
     
     if not raw_data:
-        st.info("Danh mục đang được cập nhật hoặc Firebase đang quá tải...")
+        st.info("Danh mục đang được cập nhật...")
         return
 
     import pandas as pd
