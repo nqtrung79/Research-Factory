@@ -546,6 +546,28 @@ def render_results():
     # Show comments at the end of results too
     # render_comments()
 
+@st.cache_data(ttl=600)
+def get_cached_library():
+    # Gọi hàm gốc từ đối tượng firebase_service đã khởi tạo
+    return firebase_service.get_library_data()
+
+def render_library():
+    st.write("---")
+    st.subheader("📚 Danh mục đề tài vừa khởi tạo")
+    
+    # Gọi cái hàm có cache vừa tạo ở trên
+    raw_data = get_cached_library() 
+    
+    if not raw_data:
+        st.info("Danh mục đang được cập nhật hoặc Firebase đang quá tải...")
+        return
+
+    import pandas as pd
+    df = pd.DataFrame(raw_data)
+    
+    # Đoạn này hiển thị bảng 10 dòng đầu
+    st.table(df.head(10))
+
 def main():
     initialize_session()
     
@@ -562,9 +584,9 @@ def main():
     elif st.session_state.step == "LANDING":
         render_landing_page() # (Đã xóa render_comments bên trong hàm này)
         
-    elif st.session_state.step == "FORM":
+elif st.session_state.step == "FORM":
         render_research_form()
-        # Thêm render_library ở đây
+        # Gọi cực kỳ đơn giản như thế này thôi:
         try:
             render_library()
         except Exception:
