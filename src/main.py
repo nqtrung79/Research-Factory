@@ -139,33 +139,36 @@ def get_cached_comments():
     return firebase_service.get_comments()
 
 def render_comments():
-    comments = get_cached_comments()
     st.write("---")
     st.subheader("💬 Cộng đồng V-Scholar")
     
-    # 1. Rating UI
-    st.write("#### Bạn đánh giá thế nào về trợ lý này?")
-    
-    # Sử dụng st.feedback đơn lẻ (không cần button "Gửi đánh giá" vì bấm sao là ăn ngay)
-    rating_index = st.feedback("stars", key="main_rating")
-
-    if rating_index is not None:
-        # Chuyển từ index 0-4 sang 1-5 sao
-        actual_rating = rating_index + 1
+    # 1. Bao bọc toàn bộ nội dung trong khối try để tránh lỗi Quota làm sập App
+    try:
+        # Sử dụng hàm lấy comments đã có cache (như bạn đã đặt trên đầu hàm)
+        comments = get_cached_comments()
         
-        # Chỉ gửi lên Firebase một lần (dùng session_state để chặn gửi liên tục)
-        if st.session_state.get("last_submitted_rating") != actual_rating:
-            firebase_service.add_rating("anonymous@user.com", actual_rating)
-            st.session_state.last_submitted_rating = actual_rating
-            st.success(f"Cảm ơn bạn đã đánh giá {actual_rating} sao!")
-            time.sleep(0.5)
-            st.rerun()
-            
-    # 2. Hiển thị điểm trung bình
-    # Lấy điểm trực tiếp từ Firebase để đảm bảo tính thời gian thực
-    avg_rating = firebase_service.get_average_rating()
-    st.caption(f"⭐ Đánh giá trung bình hiện tại: {avg_rating:.1f}/5")
-    
+        # 2. Rating UI
+        st.write("#### Bạn đánh giá thế nào về trợ lý này?")
+        rating_index = st.feedback("stars", key="main_rating")
+
+        if rating_index is not None:
+            actual_rating = rating_index + 1
+            if st.session_state.get("last_submitted_rating") != actual_rating:
+                firebase_service.add_rating("anonymous@user.com", actual_rating)
+                st.session_state.last_submitted_rating = actual_rating
+                st.success(f"Cảm ơn bạn đã đánh giá {actual_rating} sao!")
+                time.sleep(0.5)
+                st.rerun()
+                
+        # 3. Hiển thị điểm trung bình
+        avg_rating = firebase_service.get_average_rating()
+        st.caption(f"⭐ Đánh giá trung bình hiện tại: {avg_rating:.1f}/5")
+
+        # --- DÁN TOÀN BỘ PHẦN COMMENT FORM VÀ DISPLAY COMMENTS CỦA BẠN VÀO ĐÂY ---
+        # (Giữ nguyên các logic st.expander, st.form, Group replies, Like, Phản hồi...)
+        # ... [Đoạn code dài dằng dặc của bạn] ...
+
+ 
 
     # Comment Form
     st.write("#### Thảo luận & Góp ý")
@@ -245,6 +248,12 @@ def render_comments():
                             firebase_service.add_comment(re_email, "Người dùng phản hồi", re_content, parent_id=c.get("id"))
                             st.session_state.reply_to = None
                             st.rerun()
+
+    # 4. "Cầu chì" bảo vệ khi Firebase báo lỗi Quota (429/403)
+    except Exception as e:
+        st.info("📢 Hệ thống bình luận & đánh giá đang tạm nghỉ do quá tải hạn mức. Bạn vẫn có thể sử dụng các tính năng AI phía trên bình thường!")
+        # Chỉ in lỗi ra console để admin (là bạn) biết, không làm phiền người dùng
+        logger.error(f"Firebase Error: {str(e)}")
 
 def render_landing_page():
     st.markdown('<h1 class="main-header">Ứng dụng viết đề cương nghiên cứu 🎓</h1>', unsafe_allow_html=True)
