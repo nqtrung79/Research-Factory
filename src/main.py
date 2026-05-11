@@ -108,7 +108,13 @@ def handle_bot_activity():
             firebase_service.add_comment("bot@vscholar.ai", "V-Scholar Bot", content, is_bot=True)
             logger.info("Bot posted a random comment.")
 
+@st.cache_data(ttl=600)  # TTL=600 nghĩa là nó sẽ nhớ dữ liệu trong 10 phút
+def get_cached_comments():
+    # Gọi hàm lấy bình luận gốc từ firebase_service
+    return firebase_service.get_comments()
+
 def render_comments():
+    comments = get_cached_comments()
     st.write("---")
     st.subheader("💬 Cộng đồng V-Scholar")
     
@@ -418,6 +424,11 @@ def handle_workflow(params):
             st.error(f"Lỗi: {str(e)}")
             logger.error(f"Workflow Error: {str(e)}")
 
+@st.cache_data(ttl=3600) # Hệ thống sẽ nhớ kết quả của cùng 1 đề tài trong 1 giờ
+def cached_generate_outline(selected_title, params):
+    # Gọi hàm gốc từ client
+    return gemini_client.generate_proposal_outline(selected_title, params)
+    
 def render_results():
     """Renders the analysis result and proposal outline."""
     res = st.session_state.analysis_result
@@ -441,7 +452,8 @@ def render_results():
                 st.warning("Vui lòng nhập hoặc chọn một tên đề tài để soạn thảo đề cương.")
             else:
                 with st.spinner("Đang soạn thảo đề cương học thuật chi tiết..."):
-                    outline = gemini_client.generate_proposal_outline(selected_title, res['params'])
+                    # outline = gemini_client.generate_proposal_outline(selected_title, res['params'])
+                    outline = cached_generate_outline(selected_title, res['params'])
                     st.session_state.proposal_outline = outline
                     st.session_state.selected_research_title = selected_title
                     
@@ -504,7 +516,7 @@ def main():
     initialize_session()
     
     # 0. Bot Activity Simulation
-    handle_bot_activity()
+    # handle_bot_activity()
     
     # 1. Sidebar Authentication
     # Note: User mentioned "người dùng không cần đăng nhập vẫn comment được"
