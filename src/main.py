@@ -170,84 +170,84 @@ def render_comments():
 
  
 
-    # Comment Form
-    st.write("#### Thảo luận & Góp ý")
-    with st.expander("Gửi bình luận mới", expanded=not st.session_state.has_commented):
-        with st.form("comment_form", clear_on_submit=True):
-            user_email = st.text_input("Email của bạn*", placeholder="email@example.com")
-            user_name = st.text_input("Tên hiển thị (Tùy chọn)", placeholder="V-Scholar User")
-            comment_text = st.text_area("Nội dung*", placeholder="Chia sẻ ý kiến hoặc thắc mắc của bạn...")
-            sub = st.form_submit_button("Gửi bình luận")
-            
-            if sub:
-                if not user_email or not comment_text:
-                    st.error("Vui lòng điền đầy đủ thông tin bắt buộc.")
-                elif is_spam(comment_text):
-                    st.warning("⚠️ Bình luận của bạn nghi ngờ là spam. Vui lòng thử lại với nội dung khác.")
-                else:
-                    firebase_service.add_comment(user_email, user_name or "Người dùng ẩn danh", comment_text)
-                    st.session_state.has_commented = True
-                    st.success("Bình luận của bạn đã được gửi!")
-                    st.write("Đã nhấn nút gửi!") # Dòng này để test trên màn hình
-                    print("LOG: User nhan nut gui binh luan") # Dòng này để test trên Logs
-                    st.rerun()
-
-    # Display Comments
-    comments = firebase_service.get_comments()
-    if not comments:
-        st.info("Chưa có bình luận nào. Hãy là người đầu tiên!")
-    else:
-        # Group replies
-        main_comments = [c for c in comments if not c.get("parent_id")]
-        replies = [c for c in comments if c.get("parent_id")]
-        
-        for c in reversed(main_comments):
-            is_bot = c.get("is_bot")
-            card_class = "comment-card bot-comment" if is_bot else "comment-card"
-            
-            st.markdown(f"""
-            <div class="{card_class}">
-                <strong>{c.get('user_name')}</strong> {'🤖' if is_bot else '👤'} <br>
-                <small style="color: #6b7280;">{c.get('timestamp')}</small> <br>
-                <p style="margin-top: 0.5rem;">{c.get('content')}</p>
-                <small style="color: #1E3A8A; font-weight: bold;">👍 {c.get('likes', 0)} likes</small>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            # Action buttons row
-            col_act1, col_act2 = st.columns([1, 8])
-            with col_act1:
-                if st.button("❤️ Like", key=f"like_{c.get('id')}"):
-                    firebase_service.add_like(c.get('id'))
-                    st.rerun()
-            with col_act2:
-                if not is_bot:
-                    if st.button("💬 Phản hồi", key=f"reply_{c.get('id')}"):
-                        st.session_state.reply_to = c.get("id")
+        # Comment Form
+        st.write("#### Thảo luận & Góp ý")
+        with st.expander("Gửi bình luận mới", expanded=not st.session_state.has_commented):
+            with st.form("comment_form", clear_on_submit=True):
+                user_email = st.text_input("Email của bạn*", placeholder="email@example.com")
+                user_name = st.text_input("Tên hiển thị (Tùy chọn)", placeholder="V-Scholar User")
+                comment_text = st.text_area("Nội dung*", placeholder="Chia sẻ ý kiến hoặc thắc mắc của bạn...")
+                sub = st.form_submit_button("Gửi bình luận")
+                
+                if sub:
+                    if not user_email or not comment_text:
+                        st.error("Vui lòng điền đầy đủ thông tin bắt buộc.")
+                    elif is_spam(comment_text):
+                        st.warning("⚠️ Bình luận của bạn nghi ngờ là spam. Vui lòng thử lại với nội dung khác.")
+                    else:
+                        firebase_service.add_comment(user_email, user_name or "Người dùng ẩn danh", comment_text)
+                        st.session_state.has_commented = True
+                        st.success("Bình luận của bạn đã được gửi!")
+                        st.write("Đã nhấn nút gửi!") # Dòng này để test trên màn hình
+                        print("LOG: User nhan nut gui binh luan") # Dòng này để test trên Logs
                         st.rerun()
 
-            # Show replies
-            c_replies = [r for r in replies if r.get("parent_id") == c.get("id")]
-            for r in c_replies:
-                r_is_bot = r.get("is_bot")
-                r_card_class = "comment-card bot-comment" if r_is_bot else "comment-card"
+        # Display Comments
+        comments = firebase_service.get_comments()
+        if not comments:
+            st.info("Chưa có bình luận nào. Hãy là người đầu tiên!")
+        else:
+            # Group replies
+            main_comments = [c for c in comments if not c.get("parent_id")]
+            replies = [c for c in comments if c.get("parent_id")]
+            
+            for c in reversed(main_comments):
+                is_bot = c.get("is_bot")
+                card_class = "comment-card bot-comment" if is_bot else "comment-card"
+                
                 st.markdown(f"""
-                <div style="margin-left: 2rem;" class="{r_card_class}">
-                    <strong>{r.get('user_name')}</strong> {'🤖' if r_is_bot else '👤'} <br>
-                    <small style="color: #6b7280;">{r.get('timestamp')}</small> <br>
-                    <p style="margin-top: 0.5rem;">{r.get('content')}</p>
+                <div class="{card_class}">
+                    <strong>{c.get('user_name')}</strong> {'🤖' if is_bot else '👤'} <br>
+                    <small style="color: #6b7280;">{c.get('timestamp')}</small> <br>
+                    <p style="margin-top: 0.5rem;">{c.get('content')}</p>
+                    <small style="color: #1E3A8A; font-weight: bold;">👍 {c.get('likes', 0)} likes</small>
                 </div>
                 """, unsafe_allow_html=True)
-            
-            if st.session_state.get("reply_to") == c.get("id"):
-                with st.form(f"reply_form_{c.get('id')}"):
-                    re_email = st.text_input("Email của bạn*", key=f"re_email_{c.get('id')}")
-                    re_content = st.text_area("Nội dung phản hồi*", key=f"re_content_{c.get('id')}")
-                    if st.form_submit_button("Gửi phản hồi"):
-                        if re_email and re_content and not is_spam(re_content):
-                            firebase_service.add_comment(re_email, "Người dùng phản hồi", re_content, parent_id=c.get("id"))
-                            st.session_state.reply_to = None
+                
+                # Action buttons row
+                col_act1, col_act2 = st.columns([1, 8])
+                with col_act1:
+                    if st.button("❤️ Like", key=f"like_{c.get('id')}"):
+                        firebase_service.add_like(c.get('id'))
+                        st.rerun()
+                with col_act2:
+                    if not is_bot:
+                        if st.button("💬 Phản hồi", key=f"reply_{c.get('id')}"):
+                            st.session_state.reply_to = c.get("id")
                             st.rerun()
+    
+                # Show replies
+                c_replies = [r for r in replies if r.get("parent_id") == c.get("id")]
+                for r in c_replies:
+                    r_is_bot = r.get("is_bot")
+                    r_card_class = "comment-card bot-comment" if r_is_bot else "comment-card"
+                    st.markdown(f"""
+                    <div style="margin-left: 2rem;" class="{r_card_class}">
+                        <strong>{r.get('user_name')}</strong> {'🤖' if r_is_bot else '👤'} <br>
+                        <small style="color: #6b7280;">{r.get('timestamp')}</small> <br>
+                        <p style="margin-top: 0.5rem;">{r.get('content')}</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                if st.session_state.get("reply_to") == c.get("id"):
+                    with st.form(f"reply_form_{c.get('id')}"):
+                        re_email = st.text_input("Email của bạn*", key=f"re_email_{c.get('id')}")
+                        re_content = st.text_area("Nội dung phản hồi*", key=f"re_content_{c.get('id')}")
+                        if st.form_submit_button("Gửi phản hồi"):
+                            if re_email and re_content and not is_spam(re_content):
+                                firebase_service.add_comment(re_email, "Người dùng phản hồi", re_content, parent_id=c.get("id"))
+                                st.session_state.reply_to = None
+                                st.rerun()
 
     # 4. "Cầu chì" bảo vệ khi Firebase báo lỗi Quota (429/403)
     except Exception as e:
