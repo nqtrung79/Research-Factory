@@ -19,7 +19,7 @@ from utils.export_handler import markdown_to_docx
 
 # Page configuration
 st.set_page_config(
-    page_title="Ứng dụng viết đề cương",
+    page_title="Ứng dụng miến phí viết đề cương",
     page_icon="🎓",
     layout="wide",
     initial_sidebar_state="expanded"
