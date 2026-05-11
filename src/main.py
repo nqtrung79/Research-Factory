@@ -584,7 +584,7 @@ def main():
     elif st.session_state.step == "LANDING":
         render_landing_page() # (Đã xóa render_comments bên trong hàm này)
         
-elif st.session_state.step == "FORM":
+    elif st.session_state.step == "FORM":
         render_research_form()
         # Gọi cực kỳ đơn giản như thế này thôi:
         try:
