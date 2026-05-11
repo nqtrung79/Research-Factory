@@ -548,8 +548,14 @@ def render_results():
 
 @st.cache_data(ttl=600)
 def get_cached_library():
-    # Gọi hàm gốc từ đối tượng firebase_service đã khởi tạo
-    return firebase_service.get_library_data()
+    try:
+        # Gọi hàm từ service
+        data = firebase_service.get_library_data()
+        # Nếu data là None (do lỗi trong service), trả về list rỗng
+        return data if data is not None else []
+    except Exception as e:
+        logger.error(f"Lỗi khi lấy dữ liệu cache: {e}")
+        return []
 
 def render_library():
     st.write("---")
@@ -571,38 +577,34 @@ def render_library():
 def main():
     initialize_session()
     
-    # 0. Bot Activity Simulation (Đã tắt)
-    # handle_bot_activity()
-    
     # 1. Sidebar Authentication
     name, auth_status, username = auth_handler.login()
     
-    # 2. Điều hướng giao diện chính
+    # 2. Điều hướng giao diện chính (Phần thay đổi theo từng bước)
     if st.session_state.step == "DANG_KY_FORM":
         auth_handler.render_registration_form()
-        
     elif st.session_state.step == "LANDING":
-        render_landing_page() # (Đã xóa render_comments bên trong hàm này)
-        
+        render_landing_page()
     elif st.session_state.step == "FORM":
         render_research_form()
-        # Gọi cực kỳ đơn giản như thế này thôi:
-        try:
-            render_library()
-        except Exception:
-            st.info("Danh mục thư viện đang tạm nghỉ bảo trì.")
-        
     elif st.session_state.step == "RESULT":
-        render_results() # (Đã xóa render_comments bên trong hàm này)
+        render_results()
+
+    # --- PHẦN TIỆN ÍCH DƯỚI CÙNG (Luôn hiển thị ở mọi bước) ---
     
-    # 3. PHẦN BÌNH LUẬN (DUY NHẤT TẠI ĐÂY)
-    # Bọc trong try/except để nếu Firebase hết Quota (Lỗi 403) thì App vẫn chạy phần AI
+    # 3. DANH MỤC THƯ VIỆN
+    try:
+        render_library()
+    except Exception as e:
+        logger.error(f"Library Render Error: {str(e)}")
+        # Không cần hiện st.info ở đây nếu bạn đã có st.info trong render_library rồi
+
+    # 4. PHẦN BÌNH LUẬN
     try:
         render_comments()
     except Exception as e:
         st.write("---")
-        st.info("💬 Hệ thống bình luận đang tạm thời quá tải hạn mức. Bạn vẫn có thể sử dụng các tính năng AI phía trên bình thường!")
-        # In lỗi ra log để bạn theo dõi
+        st.info("💬 Hệ thống bình luận đang tạm thời quá tải...")
         logger.error(f"Firebase Render Error: {str(e)}")
 
 if __name__ == "__main__":
