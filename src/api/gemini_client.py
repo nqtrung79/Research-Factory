@@ -87,6 +87,12 @@ class GeminiClient:
             response = model.generate_content(prompt)
             return response.text
         except Exception as e:
+            if "429" in str(e) or "quota" in str(e).lower():
+                try:
+                    from api.groq_client import groq_client
+                    return groq_client.generate_research_ideas(context, lit_reviews)
+                except:
+                    return "⚠️ Hệ thống đang quá tải hạn mức. Bạn vui lòng quay lại sau ít phút nhé!"
             logger.error(f"Gemini API Error: {str(e)}")
             return "Xin lỗi, hiện tại tôi không thể tạo gợi ý. Vui lòng thử lại sau."
 
@@ -136,6 +142,12 @@ class GeminiClient:
             response = model.generate_content(prompt)
             return response.text
         except Exception as e:
+            if "429" in str(e) or "quota" in str(e).lower():
+                try:
+                    from api.groq_client import groq_client
+                    return groq_client.generate_proposal_outline(selected_title, context)
+                except:
+                    return "⚠️ Hiện tại hệ thống đang quá tải hạn mức. Bạn vui lòng quay lại sau ít phút nhé!"
             logger.error(f"Gemini API Error: {str(e)}")
             return "Lỗi khi tạo đề cương."
 
