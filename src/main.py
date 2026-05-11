@@ -282,7 +282,7 @@ def render_landing_page():
     st.caption("✨ **Mẹo:** Cung cấp càng nhiều thông tin chi tiết, gợi ý càng chính xác.")
     
     # Show comments on landing too
-    render_comments()
+    # render_comments()
 
 def render_research_form():
     level = st.session_state.research_level
@@ -535,34 +535,44 @@ def render_results():
         st.json(res['nlp'])
     
     # Show comments at the end of results too
-    render_comments()
+    # render_comments()
 
 def main():
     initialize_session()
     
-    # 0. Bot Activity Simulation (Đã tắt theo yêu cầu để cứu Quota)
+    # 0. Bot Activity Simulation (Đã tắt)
     # handle_bot_activity()
     
     # 1. Sidebar Authentication
     name, auth_status, username = auth_handler.login()
     
-    # 2. Main Logic Flow
+    # 2. Điều hướng giao diện chính
     if st.session_state.step == "DANG_KY_FORM":
         auth_handler.render_registration_form()
         
     elif st.session_state.step == "LANDING":
-        render_landing_page()
+        render_landing_page() # (Đã xóa render_comments bên trong hàm này)
         
     elif st.session_state.step == "FORM":
-        render_research_form()  # Hiện Form nhập liệu trước
-        render_library()        # Hiện Danh mục đề tài ngay bên dưới Form
+        render_research_form()
+        # Thêm render_library ở đây
+        try:
+            render_library()
+        except Exception:
+            st.info("Danh mục thư viện đang tạm nghỉ bảo trì.")
         
     elif st.session_state.step == "RESULT":
-        render_results()        # Hiện kết quả phân tích và đề cương
+        render_results() # (Đã xóa render_comments bên trong hàm này)
     
-    # 3. Phần bình luận (Luôn nằm ở cuối trang dù ở bước nào)
-    st.write("---")
-    render_comments()
+    # 3. PHẦN BÌNH LUẬN (DUY NHẤT TẠI ĐÂY)
+    # Bọc trong try/except để nếu Firebase hết Quota (Lỗi 403) thì App vẫn chạy phần AI
+    try:
+        render_comments()
+    except Exception as e:
+        st.write("---")
+        st.info("💬 Hệ thống bình luận đang tạm thời quá tải hạn mức. Bạn vẫn có thể sử dụng các tính năng AI phía trên bình thường!")
+        # In lỗi ra log để bạn theo dõi
+        logger.error(f"Firebase Render Error: {str(e)}")
 
 if __name__ == "__main__":
     main()
