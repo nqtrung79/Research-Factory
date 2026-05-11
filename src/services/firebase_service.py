@@ -42,22 +42,22 @@ class FirebaseService:
             self.db = None
 
     def get_library_data():
-    # Giả sử firebase_service đã được khởi tạo
-    try:
-        # Lấy 100 đề tài mới nhất để hiển thị
-        docs = firebase_service.db.collection("user_journeys").order_by("timestamp", direction="DESCENDING").limit(100).stream()
-        data = []
-        for doc in docs:
-            d = doc.to_dict()
-            # Lấy thông tin từ cấu trúc json bạn đã lưu
-            data.append({
-                "Tên đề tài": d.get("topic") or d.get("user_input", {}).get("existing_title", "N/A"),
-                "Cấp độ": d.get("level", "N/A"),
-                "Lĩnh vực": d.get("user_input", {}).get("object", "N/A")
-            })
-        return data
-    except Exception:
-        return []
+        # Giả sử firebase_service đã được khởi tạo
+        try:
+            # Lấy 100 đề tài mới nhất để hiển thị
+            docs = firebase_service.db.collection("user_journeys").order_by("timestamp", direction="DESCENDING").limit(100).stream()
+            data = []
+            for doc in docs:
+                d = doc.to_dict()
+                # Lấy thông tin từ cấu trúc json bạn đã lưu
+                data.append({
+                    "Tên đề tài": d.get("topic") or d.get("user_input", {}).get("existing_title", "N/A"),
+                    "Cấp độ": d.get("level", "N/A"),
+                    "Lĩnh vực": d.get("user_input", {}).get("object", "N/A")
+                })
+            return data
+        except Exception:
+            return []
     
     def add_comment(self, email, name, content, parent_id=None, is_bot=False):
         if not self.db: return None
