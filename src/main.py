@@ -81,6 +81,7 @@ def initialize_session():
         st.session_state.session_id = str(uuid.uuid4())
 
 def render_library():
+    return
     st.write("---")
     st.subheader("📚 Danh mục đề tài vừa khởi tạo")
     
@@ -139,6 +140,7 @@ def get_cached_comments():
     return firebase_service.get_comments()
 
 def render_comments():
+    return
     st.write("---")
     st.subheader("💬 Cộng đồng V-Scholar")
     
