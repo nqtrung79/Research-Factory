@@ -41,22 +41,35 @@ class FirebaseService:
             logger.error(f"❌ Lỗi khởi tạo Firebase: {e}")
             self.db = None
 
-    def get_library_data():
-        # Giả sử firebase_service đã được khởi tạo
+    def get_library_data(self): # <--- Phải có self ở đây
+        # Sử dụng self.db để lấy kết nối đã khởi tạo trong hàm __init__
         try:
-            # Lấy 100 đề tài mới nhất để hiển thị
-            docs = firebase_service.db.collection("user_journeys").order_by("timestamp", direction="DESCENDING").limit(100).stream()
+            if self.db is None:
+                logger.error("Firebase DB chưa được khởi tạo!")
+                return []
+
+            # Lấy 100 đề tài mới nhất
+            docs = self.db.collection("user_journeys").order_by("timestamp", direction="DESCENDING").limit(100).stream()
             data = []
+            
             for doc in docs:
                 d = doc.to_dict()
-                # Lấy thông tin từ cấu trúc json bạn đã lưu
+                # Lấy thông tin từ cấu trúc json
                 data.append({
                     "Tên đề tài": d.get("topic") or d.get("user_input", {}).get("existing_title", "N/A"),
                     "Cấp độ": d.get("level", "N/A"),
                     "Lĩnh vực": d.get("user_input", {}).get("object", "N/A")
                 })
+            
+            # Nếu không có dữ liệu nào
+            if not data:
+                logger.warning("Không tìm thấy dữ liệu trong collection user_journeys")
+                
             return data
-        except Exception:
+            
+        except Exception as e:
+            # Ghi lỗi cụ thể ra log để bạn kiểm tra
+            logger.error(f"Lỗi truy vấn danh mục: {str(e)}")
             return []
     
     def add_comment(self, email, name, content, parent_id=None, is_bot=False):
