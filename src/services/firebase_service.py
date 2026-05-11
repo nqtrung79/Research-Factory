@@ -124,6 +124,25 @@ class FirebaseService:
         doc_ref = self.db.collection("comments").document(comment_id)
         doc_ref.update({"likes": firestore.Increment(1)})
 
+    @st.cache_data(ttl=600)
+    def get_library_data():
+        # Giả sử firebase_service đã được khởi tạo
+        try:
+            # Lấy 100 đề tài mới nhất để hiển thị
+            docs = firebase_service.db.collection("user_journeys").order_by("timestamp", direction="DESCENDING").limit(100).stream()
+            data = []
+            for doc in docs:
+                d = doc.to_dict()
+                # Lấy thông tin từ cấu trúc json bạn đã lưu
+                data.append({
+                    "Tên đề tài": d.get("topic") or d.get("user_input", {}).get("existing_title", "N/A"),
+                    "Cấp độ": d.get("level", "N/A"),
+                    "Lĩnh vực": d.get("user_input", {}).get("object", "N/A")
+                })
+            return data
+        except Exception:
+            return []
+    
     def log_user_journey(self, session_id, user_email, user_input, generated_outline):
         """Logs the entire user journey from input to outline."""
         if not self.db: return False
