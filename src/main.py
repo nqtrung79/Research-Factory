@@ -2,6 +2,7 @@ import streamlit as st
 import time
 import random
 import uuid
+import pandas as pd
 from datetime import datetime, timedelta
 from loguru import logger
 from auth.auth_handler import auth_handler
@@ -78,6 +79,30 @@ def initialize_session():
         st.session_state.last_bot_check = datetime.now()
     if "session_id" not in st.session_state:
         st.session_state.session_id = str(uuid.uuid4())
+
+def render_library():
+    st.write("---")
+    st.subheader("📚 Danh mục đề tài vừa khởi tạo")
+    
+    raw_data = get_library_data()
+    if not raw_data:
+        st.info("Danh mục đang được cập nhật...")
+        return
+
+    df = pd.DataFrame(raw_data)
+
+    # Chia trang
+    items_per_page = 10
+    total_pages = (len(df) // items_per_page) + (1 if len(df) % items_per_page > 0 else 0)
+    
+    # Hiển thị thanh chọn trang gọn nhẹ
+    page_number = st.select_slider("Xem các đề tài cũ hơn tại trang:", options=range(1, total_pages + 1)) if total_pages > 1 else 1
+
+    start_idx = (page_number - 1) * items_per_page
+    end_idx = start_idx + items_per_page
+    
+    # Hiển thị bảng (st.table sẽ đẹp và tĩnh hơn st.dataframe trên Mobile)
+    st.table(df.iloc[start_idx:end_idx])
 
 def handle_bot_activity():
     """Simulates background bot activity."""
@@ -515,23 +540,29 @@ def render_results():
 def main():
     initialize_session()
     
-    # 0. Bot Activity Simulation
+    # 0. Bot Activity Simulation (Đã tắt theo yêu cầu để cứu Quota)
     # handle_bot_activity()
     
     # 1. Sidebar Authentication
-    # Note: User mentioned "người dùng không cần đăng nhập vẫn comment được"
-    # So we keep auth optional
     name, auth_status, username = auth_handler.login()
     
     # 2. Main Logic Flow
     if st.session_state.step == "DANG_KY_FORM":
         auth_handler.render_registration_form()
+        
     elif st.session_state.step == "LANDING":
         render_landing_page()
+        
     elif st.session_state.step == "FORM":
-        render_research_form()
+        render_research_form()  # Hiện Form nhập liệu trước
+        render_library()        # Hiện Danh mục đề tài ngay bên dưới Form
+        
     elif st.session_state.step == "RESULT":
-        render_results()
+        render_results()        # Hiện kết quả phân tích và đề cương
+    
+    # 3. Phần bình luận (Luôn nằm ở cuối trang dù ở bước nào)
+    st.write("---")
+    render_comments()
 
 if __name__ == "__main__":
     main()
