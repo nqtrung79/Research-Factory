@@ -105,6 +105,7 @@ def render_library():
     st.table(df.iloc[start_idx:end_idx])
 
 def handle_bot_activity():
+    return
     """Simulates background bot activity."""
     # This runs periodically on refresh
     now = datetime.now()
