@@ -35,6 +35,11 @@ service cloud.firestore {
       allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes'])
                     || (request.auth != null && request.auth.token.email_verified == true);
     }
+    
+    match /user_journeys/{journeyId} {
+      allow read: if true;
+      allow create: if true; // Hoặc giới hạn theo ý bạn
+    }
 
     match /ratings/{ratingId} {
       allow read: if true;
