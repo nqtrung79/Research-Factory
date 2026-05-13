@@ -64,6 +64,14 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+@st.cache_data(ttl=600)
+def get_cached_comments():
+    return firebase_service.get_comments()
+
+@st.cache_data(ttl=1800) 
+def get_cached_avg_rating():
+    return firebase_service.get_average_rating()
+
 def initialize_session():
     if "research_level" not in st.session_state:
         st.session_state.research_level = None
@@ -134,11 +142,7 @@ def handle_bot_activity():
             firebase_service.add_comment("bot@vscholar.ai", "V-Scholar Bot", content, is_bot=True)
             logger.info("Bot posted a random comment.")
 
-@st.cache_data(ttl=600)  # TTL=600 nghĩa là nó sẽ nhớ dữ liệu trong 10 phút
-def get_cached_comments():
-    # Gọi hàm lấy bình luận gốc từ firebase_service
-    return firebase_service.get_comments()
-
+   
 def render_comments():
     st.write("---")
     st.subheader("💬 Cộng đồng V-Scholar")
