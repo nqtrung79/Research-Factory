@@ -94,7 +94,7 @@ class FirebaseService:
         try:
             # Attempt to fetch with server-side ordering
             try:
-                docs = self.db.collection("comments").order_by("timestamp", direction=firestore.Query.ASCENDING).stream()
+                docs = self.db.collection("comments").order_by("timestamp", direction="DESCENDING").limit(30).stream()
             except Exception as e:
                 logger.warning(f"Server-side ordering failed: {e}. Falling back to client-side sort.")
                 docs = self.db.collection("comments").stream()
