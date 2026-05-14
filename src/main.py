@@ -123,7 +123,7 @@ def handle_bot_activity():
     # We'll use a local check but randomize triggers to simulate global activity.
     
     if random.random() < 0.05: # 5% chance on refresh to trigger bot actions
-        comments = firebase_service.get_comments()
+        comments = get_cache_comments()
         
         # Action 1: Reply to un-replied comments
         unreplied = [c for c in comments if not c.get("is_bot") and not any(r.get("parent_id") == c.get("id") for r in comments)]
@@ -142,7 +142,7 @@ def handle_bot_activity():
             firebase_service.add_comment("bot@vscholar.ai", "V-Scholar Bot", content, is_bot=True)
             logger.info("Bot posted a random comment.")
 
-   
+@st.fragment   
 def render_comments():
     st.write("---")
     st.subheader("💬 Cộng đồng V-Scholar")
@@ -198,7 +198,7 @@ def render_comments():
                         st.rerun()
 
         # Display Comments
-        comments = firebase_service.get_comments()
+        comments = firebase_service.get_cache_comments()
         if not comments:
             st.info("Chưa có bình luận nào. Hãy là người đầu tiên!")
         else:
