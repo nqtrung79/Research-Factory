@@ -139,7 +139,7 @@ class FirebaseService:
     def get_average_rating(self):
         if not self.db: return 0.0
         try:
-            docs = self.db.collection("ratings").stream()
+            docs = self.db.collection("ratings").limit(50).stream()
             ratings = []
             for d in docs:
                 data = d.to_dict()
