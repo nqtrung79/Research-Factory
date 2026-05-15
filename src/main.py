@@ -542,21 +542,20 @@ def render_results():
             st.markdown("---")
             st.subheader(f"📄 Bản đề cương tham khảo: {st.session_state.selected_research_title}")
             st.markdown(st.session_state.proposal_outline)
-            
+
             st.divider()
             st.write("#### 📥 Tải xuống đề cương")
-            if not (st.session_state.has_rated and st.session_state.has_commented):
-                st.warning("⚠️ Vui lòng đánh giá 5 sao và để lại bình luận góp ý ở cuối trang để mở khóa tính năng tải xuống đề cương.")
-            else:
-                st.success("✅ Tuyệt vời! Bạn đã có thể tải xuống đề cương dưới dạng file chuyên nghiệp.")
-                docx_data = markdown_to_docx(st.session_state.proposal_outline)
-                st.download_button(
-                    label="💾 Tải xuống Đề cương (.docx)",
-                    data=docx_data,
-                    file_name=f"De_cuong_{st.session_state.selected_research_title.replace(' ', '_')}.docx",
-                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                )
-
+            
+            # Không cần điều kiện nữa, hiện luôn nút tải
+            docx_data = markdown_to_docx(st.session_state.proposal_outline)
+            st.download_button(
+                label="💾 Tải xuống Đề cương (.docx)",
+                data=docx_data,
+                file_name=f"De_cuong_{st.session_state.selected_research_title.replace(' ', '_')}.docx",
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                use_container_width=True # Thêm cái này để nút bấm to rõ hơn trên điện thoại
+            )
+ 
     with tab_literature:
         st.write("### 📜 Tài liệu tham khảo đề xuất")
         level = res['params']['level']
