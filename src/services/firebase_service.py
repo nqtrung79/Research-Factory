@@ -41,45 +41,45 @@ class FirebaseService:
             logger.error(f"❌ Lỗi khởi tạo Firebase: {e}")
             self.db = None
 
-def get_library_data(self):
-    try:
-        if self.db is None: return []
-        
-        # Lấy 30 bản ghi mới nhất để chọn lọc
-        docs = self.db.collection("user_journeys").order_by("timestamp", direction="DESCENDING").limit(30).stream()
-        data = []
-        
-        # Danh sách các câu báo lỗi hệ thống chính xác
-        system_errors = [
-            "Lỗi khi tạo đề cương.",
-            "Hiện tại hệ thống đang quá tải hạn mức",
-            "Error generating outline"
-        ]
-        
-        for doc in docs:
-            d = doc.to_dict()
-            outline = d.get("generated_outline", "")
+    def get_library_data(self):
+        try:
+            if self.db is None: return []
             
-            # ĐIỀU KIỆN LỌC AN TOÀN:
-            # 1. Độ dài phải đủ lớn (đề cương thật thường > 1000 ký tự)
-            # 2. Nội dung không ĐI THẲNG vào các câu báo lỗi hệ thống
+            # Lấy 30 bản ghi mới nhất để chọn lọc
+            docs = self.db.collection("user_journeys").order_by("timestamp", direction="DESCENDING").limit(30).stream()
+            data = []
             
-            is_system_error = any(outline.strip().startswith(err) for err in system_errors)
+            # Danh sách các câu báo lỗi hệ thống chính xác
+            system_errors = [
+                "Lỗi khi tạo đề cương.",
+                "Hiện tại hệ thống đang quá tải hạn mức",
+                "Error generating outline"
+            ]
             
-            if len(outline) > 500 and not is_system_error:
-                data.append({
-                    "id": doc.id,
-                    "Tên đề tài": d.get("topic") or d.get("user_input", {}).get("existing_title", "N/A"),
-                    "Cấp độ": d.get("level", "N/A"),
-                    "Nội dung": outline
-                })
-            
-            if len(data) >= 10: break # Chỉ lấy tối đa 10 cái để hiển thị
+            for doc in docs:
+                d = doc.to_dict()
+                outline = d.get("generated_outline", "")
                 
-        return data
-    except Exception as e:
-        logger.error(f"Lỗi truy vấn thư viện: {e}")
-        return []
+                # ĐIỀU KIỆN LỌC AN TOÀN:
+                # 1. Độ dài phải đủ lớn (đề cương thật thường > 1000 ký tự)
+                # 2. Nội dung không ĐI THẲNG vào các câu báo lỗi hệ thống
+                
+                is_system_error = any(outline.strip().startswith(err) for err in system_errors)
+                
+                if len(outline) > 500 and not is_system_error:
+                    data.append({
+                        "id": doc.id,
+                        "Tên đề tài": d.get("topic") or d.get("user_input", {}).get("existing_title", "N/A"),
+                        "Cấp độ": d.get("level", "N/A"),
+                        "Nội dung": outline
+                    })
+                
+                if len(data) >= 10: break # Chỉ lấy tối đa 10 cái để hiển thị
+                    
+            return data
+        except Exception as e:
+            logger.error(f"Lỗi truy vấn thư viện: {e}")
+            return []
     
     def add_comment(self, email, name, content, parent_id=None, is_bot=False):
         if not self.db: return None
