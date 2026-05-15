@@ -1,3 +1,11 @@
+import sys
+import os
+
+# Thêm thư mục hiện tại vào hệ thống đường dẫn của Python
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.append(current_dir)
+    
 import streamlit as st
 import time
 import random
