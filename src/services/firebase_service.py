@@ -44,23 +44,20 @@ class FirebaseService:
 def get_library_data(self):
     try:
         if self.db is None: return []
-        # Chỉ lấy 10 đề cương mới nhất
-        docs = self.db.collection("user_journeys").order_by("timestamp", direction="DESCENDING").limit(10).stream()
+        # Chỉ lấy những đề tài có is_featured = True
+        docs = self.db.collection("user_journeys").where("is_featured", "==", True).limit(10).stream()
         data = []
         for doc in docs:
             d = doc.to_dict()
-            outline = d.get("generated_outline", "")
-            # Lọc: Chỉ lấy những đề cương có nội dung đủ dài (> 500 ký tự)
-            if len(outline) > 500:
-                data.append({
-                    "id": doc.id,
-                    "Tên đề tài": d.get("topic") or d.get("user_input", {}).get("existing_title", "N/A"),
-                    "Cấp độ": d.get("level", "N/A"),
-                    "Nội dung": outline
-                })
+            data.append({
+                "id": doc.id,
+                "Tên đề tài": d.get("topic") or d.get("user_input", {}).get("existing_title", "N/A"),
+                "Cấp độ": d.get("level", "N/A"),
+                "Nội dung": d.get("generated_outline", "Nội dung đang cập nhật...")
+            })
         return data
     except Exception as e:
-        logger.error(f"Lỗi truy vấn thư viện: {str(e)}")
+        logger.error(f"Lỗi truy vấn: {e}")
         return []
     
     def add_comment(self, email, name, content, parent_id=None, is_bot=False):
