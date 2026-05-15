@@ -41,36 +41,30 @@ class FirebaseService:
             logger.error(f"❌ Lỗi khởi tạo Firebase: {e}")
             self.db = None
 
-    def get_library_data(self): # <--- Phải có self ở đây
-        # Sử dụng self.db để lấy kết nối đã khởi tạo trong hàm __init__
-        try:
-            if self.db is None:
-                logger.error("Firebase DB chưa được khởi tạo!")
-                return []
+def get_library_data(self):
+    try:
+        if self.db is None: return []
 
-            # Lấy 100 đề tài mới nhất
-            docs = self.db.collection("user_journeys").order_by("timestamp", direction="DESCENDING").limit(100).stream()
-            data = []
+        # Chỉ lấy 10 đề cương mới nhất và dài nhất để đảm bảo chất lượng
+        docs = self.db.collection("user_journeys").order_by("timestamp", direction="DESCENDING").limit(10).stream()
+        data = []
+        
+        for doc in docs:
+            d = doc.to_dict()
+            outline_content = d.get("generated_outline", "")
             
-            for doc in docs:
-                d = doc.to_dict()
-                # Lấy thông tin từ cấu trúc json
+            # Chỉ hiển thị nếu đề cương có nội dung (trên 500 ký tự)
+            if len(outline_content) > 500:
                 data.append({
+                    "id": doc.id,
                     "Tên đề tài": d.get("topic") or d.get("user_input", {}).get("existing_title", "N/A"),
                     "Cấp độ": d.get("level", "N/A"),
-                    "Lĩnh vực": d.get("user_input", {}).get("object", "N/A")
+                    "Nội dung": outline_content # Lưu tạm vào đây để hiển thị khi click
                 })
-            
-            # Nếu không có dữ liệu nào
-            if not data:
-                logger.warning("Không tìm thấy dữ liệu trong collection user_journeys")
-                
-            return data
-            
-        except Exception as e:
-            # Ghi lỗi cụ thể ra log để bạn kiểm tra
-            logger.error(f"Lỗi truy vấn danh mục: {str(e)}")
-            return []
+        return data
+    except Exception as e:
+        logger.error(f"Lỗi truy vấn đề cương hay: {e}")
+        return []
     
     def add_comment(self, email, name, content, parent_id=None, is_bot=False):
         if not self.db: return None
