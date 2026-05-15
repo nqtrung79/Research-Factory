@@ -96,55 +96,6 @@ def initialize_session():
     if "session_id" not in st.session_state:
         st.session_state.session_id = str(uuid.uuid4())
 
-def render_library():
-    st.write("---")
-    st.subheader("📚 Thư viện Đề cương tham khảo")
-    
-    raw_data = get_cached_library() 
-    
-    if not raw_data:
-        st.info("Danh mục đang được cập nhật...")
-        return
-
-    # Hiển thị tiêu đề cột (tùy chọn)
-    col_head1, col_head2 = st.columns([4, 1])
-    with col_head1:
-        st.markdown("**Tên đề tài**")
-    with col_head2:
-        st.markdown("**Hành động**")
-
-    # Hiển thị từng dòng đề tài
-    for item in raw_data:
-        col1, col2 = st.columns([4, 1])
-        with col1:
-            # Chỉ hiển thị Tên đề tài, bỏ qua ID và Cấp độ
-            st.write(item['Tên đề tài'])
-        with col2:
-            # Nút bấm để xem chi tiết
-            if st.button("Xem chi tiết", key=f"view_{item['id']}"):
-                st.session_state.current_view = item
-                st.rerun()
-
-    # Phần hiển thị chi tiết khi người dùng Click
-    if "current_view" in st.session_state:
-        view_item = st.session_state.current_view
-        # Dùng st.expander hoặc st.info để hiện nội dung đề cương dài
-        with st.expander(f"📄 Nội dung chi tiết: {view_item['Tên đề tài']}", expanded=True):
-            st.markdown(view_item['Nội dung'])
-            
-            # Tạo file Word để tải về
-            docx_data = markdown_to_docx(view_item['Nội dung'])
-            st.download_button(
-                label="💾 Tải xuống bản Word (.docx)",
-                data=docx_data,
-                file_name=f"De_cuong_{view_item['id']}.docx",
-                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            )
-            
-            if st.button("Đóng xem trước"):
-                del st.session_state.current_view
-                st.rerun()
-
 def handle_bot_activity():
     return
     """Simulates background bot activity."""
