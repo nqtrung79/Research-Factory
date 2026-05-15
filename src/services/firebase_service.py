@@ -97,7 +97,7 @@ class FirebaseService:
                 docs = self.db.collection("comments").order_by("timestamp", direction="DESCENDING").limit(30).stream()
             except Exception as e:
                 logger.warning(f"Server-side ordering failed: {e}. Falling back to client-side sort.")
-                docs = self.db.collection("comments").stream()
+                docs = self.db.collection("comments").limit(30).stream()
 
             comments_list = []
             for doc in docs:
