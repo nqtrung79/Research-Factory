@@ -44,26 +44,23 @@ class FirebaseService:
 def get_library_data(self):
     try:
         if self.db is None: return []
-
-        # Chỉ lấy 10 đề cương mới nhất và dài nhất để đảm bảo chất lượng
+        # Chỉ lấy 10 đề cương mới nhất
         docs = self.db.collection("user_journeys").order_by("timestamp", direction="DESCENDING").limit(10).stream()
         data = []
-        
         for doc in docs:
             d = doc.to_dict()
-            outline_content = d.get("generated_outline", "")
-            
-            # Chỉ hiển thị nếu đề cương có nội dung (trên 500 ký tự)
-            if len(outline_content) > 500:
+            outline = d.get("generated_outline", "")
+            # Lọc: Chỉ lấy những đề cương có nội dung đủ dài (> 500 ký tự)
+            if len(outline) > 500:
                 data.append({
                     "id": doc.id,
                     "Tên đề tài": d.get("topic") or d.get("user_input", {}).get("existing_title", "N/A"),
                     "Cấp độ": d.get("level", "N/A"),
-                    "Nội dung": outline_content # Lưu tạm vào đây để hiển thị khi click
+                    "Nội dung": outline
                 })
         return data
     except Exception as e:
-        logger.error(f"Lỗi truy vấn đề cương hay: {e}")
+        logger.error(f"Lỗi truy vấn thư viện: {str(e)}")
         return []
     
     def add_comment(self, email, name, content, parent_id=None, is_bot=False):
