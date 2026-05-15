@@ -123,7 +123,7 @@ def handle_bot_activity():
     # We'll use a local check but randomize triggers to simulate global activity.
     
     if random.random() < 0.05: # 5% chance on refresh to trigger bot actions
-        comments = get_cache_comments()
+        comments = get_cached_comments()
         
         # Action 1: Reply to un-replied comments
         unreplied = [c for c in comments if not c.get("is_bot") and not any(r.get("parent_id") == c.get("id") for r in comments)]
