@@ -212,7 +212,7 @@ def render_comments():
                         st.rerun()
 
         # Display Comments
-        comments = firebase_service.get_cache_comments()
+        comments = get_cached_comments()
         if not comments:
             st.info("Chưa có bình luận nào. Hãy là người đầu tiên!")
         else:
