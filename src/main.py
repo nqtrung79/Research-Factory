@@ -90,27 +90,41 @@ def initialize_session():
 
 def render_library():
     st.write("---")
-    st.subheader("📚 Danh mục đề tài vừa khởi tạo")
+    st.subheader("📚 Thư viện Đề cương tham khảo")
     
-    raw_data = get_library_data()
+    raw_data = get_cached_library() # Vẫn dùng cache cũ nhưng ruột đã thay đổi
+    
     if not raw_data:
         st.info("Danh mục đang được cập nhật...")
         return
 
-    df = pd.DataFrame(raw_data)
+    # Tạo bảng hiển thị
+    for item in raw_data:
+        col1, col2 = st.columns([4, 1])
+        with col1:
+            st.markdown(f"**{item['Tên đề tài']}** ({item['Cấp độ']})")
+        with col2:
+            # Dùng key duy nhất cho mỗi nút dựa trên id của Firebase
+            if st.button("Xem đề cương", key=f"btn_{item['id']}"):
+                st.session_state.current_view = item
 
-    # Chia trang
-    items_per_page = 10
-    total_pages = (len(df) // items_per_page) + (1 if len(df) % items_per_page > 0 else 0)
-    
-    # Hiển thị thanh chọn trang gọn nhẹ
-    page_number = st.select_slider("Xem các đề tài cũ hơn tại trang:", options=range(1, total_pages + 1)) if total_pages > 1 else 1
-
-    start_idx = (page_number - 1) * items_per_page
-    end_idx = start_idx + items_per_page
-    
-    # Hiển thị bảng (st.table sẽ đẹp và tĩnh hơn st.dataframe trên Mobile)
-    st.table(df.iloc[start_idx:end_idx])
+    # Nếu người dùng click "Xem", hiển thị một khu vực riêng
+    if "current_view" in st.session_state:
+        view_item = st.session_state.current_view
+        with st.expander(f"📄 Chi tiết: {view_item['Tên đề tài']}", expanded=True):
+            st.markdown(view_item['Nội dung'])
+            
+            # Nút tạo file Word tại chỗ
+            docx_data = markdown_to_docx(view_item['Nội dung'])
+            st.download_button(
+                label="💾 Tải về bản Word (.docx)",
+                data=docx_data,
+                file_name=f"De_cuong_{view_item['id']}.docx",
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            )
+            if st.button("Đóng xem trước"):
+                del st.session_state.current_view
+                st.rerun()
 
 def handle_bot_activity():
     return
