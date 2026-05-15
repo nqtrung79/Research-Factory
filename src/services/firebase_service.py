@@ -41,35 +41,27 @@ class FirebaseService:
             logger.error(f"❌ Lỗi khởi tạo Firebase: {e}")
             self.db = None
 
-    def get_library_data(self): # <--- Phải có self ở đây
-        # Sử dụng self.db để lấy kết nối đã khởi tạo trong hàm __init__
+    def get_library_data(self):
         try:
-            if self.db is None:
-                logger.error("Firebase DB chưa được khởi tạo!")
-                return []
-
-            # Lấy 100 đề tài mới nhất
-            docs = self.db.collection("user_journeys").order_by("timestamp", direction="DESCENDING").limit(100).stream()
+            if self.db is None: return []
+            # Lấy 10 bản ghi chất lượng nhất
+            docs = self.db.collection("user_journeys").order_by("timestamp", direction="DESCENDING").limit(20).stream()
             data = []
-            
             for doc in docs:
                 d = doc.to_dict()
-                # Lấy thông tin từ cấu trúc json
-                data.append({
-                    "Tên đề tài": d.get("topic") or d.get("user_input", {}).get("existing_title", "N/A"),
-                    "Cấp độ": d.get("level", "N/A"),
-                    "Lĩnh vực": d.get("user_input", {}).get("object", "N/A")
-                })
-            
-            # Nếu không có dữ liệu nào
-            if not data:
-                logger.warning("Không tìm thấy dữ liệu trong collection user_journeys")
+                outline = d.get("generated_outline", "")
                 
+                # Điều kiện: Có nội dung và không phải nội dung báo lỗi
+                if len(outline) > 500 and "Lỗi" not in outline[:50]:
+                    data.append({
+                        "id": doc.id,
+                        "Tên đề tài": d.get("topic") or d.get("user_input", {}).get("existing_title", "N/A"),
+                        "Nội dung": outline # Đây chính là cột generated_outline
+                    })
+                if len(data) >= 10: break
             return data
-            
         except Exception as e:
-            # Ghi lỗi cụ thể ra log để bạn kiểm tra
-            logger.error(f"Lỗi truy vấn danh mục: {str(e)}")
+            logger.error(f"Lỗi: {e}")
             return []
     
     def add_comment(self, email, name, content, parent_id=None, is_bot=False):

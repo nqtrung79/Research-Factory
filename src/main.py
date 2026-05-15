@@ -1,3 +1,11 @@
+import sys
+import os
+
+# Thêm thư mục hiện tại vào hệ thống đường dẫn của Python
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.append(current_dir)
+    
 import streamlit as st
 import time
 import random
@@ -90,27 +98,52 @@ def initialize_session():
 
 def render_library():
     st.write("---")
-    st.subheader("📚 Danh mục đề tài vừa khởi tạo")
+    st.subheader("📚 Thư viện Đề cương tham khảo")
     
-    raw_data = get_library_data()
+    raw_data = get_cached_library() 
+    
     if not raw_data:
         st.info("Danh mục đang được cập nhật...")
         return
 
-    df = pd.DataFrame(raw_data)
+    # Hiển thị tiêu đề cột (tùy chọn)
+    col_head1, col_head2 = st.columns([4, 1])
+    with col_head1:
+        st.markdown("**Tên đề tài**")
+    with col_head2:
+        st.markdown("**Hành động**")
 
-    # Chia trang
-    items_per_page = 10
-    total_pages = (len(df) // items_per_page) + (1 if len(df) % items_per_page > 0 else 0)
-    
-    # Hiển thị thanh chọn trang gọn nhẹ
-    page_number = st.select_slider("Xem các đề tài cũ hơn tại trang:", options=range(1, total_pages + 1)) if total_pages > 1 else 1
+    # Hiển thị từng dòng đề tài
+    for item in raw_data:
+        col1, col2 = st.columns([4, 1])
+        with col1:
+            # Chỉ hiển thị Tên đề tài, bỏ qua ID và Cấp độ
+            st.write(item['Tên đề tài'])
+        with col2:
+            # Nút bấm để xem chi tiết
+            if st.button("Xem chi tiết", key=f"view_{item['id']}"):
+                st.session_state.current_view = item
+                st.rerun()
 
-    start_idx = (page_number - 1) * items_per_page
-    end_idx = start_idx + items_per_page
-    
-    # Hiển thị bảng (st.table sẽ đẹp và tĩnh hơn st.dataframe trên Mobile)
-    st.table(df.iloc[start_idx:end_idx])
+    # Phần hiển thị chi tiết khi người dùng Click
+    if "current_view" in st.session_state:
+        view_item = st.session_state.current_view
+        # Dùng st.expander hoặc st.info để hiện nội dung đề cương dài
+        with st.expander(f"📄 Nội dung chi tiết: {view_item['Tên đề tài']}", expanded=True):
+            st.markdown(view_item['Nội dung'])
+            
+            # Tạo file Word để tải về
+            docx_data = markdown_to_docx(view_item['Nội dung'])
+            st.download_button(
+                label="💾 Tải xuống bản Word (.docx)",
+                data=docx_data,
+                file_name=f"De_cuong_{view_item['id']}.docx",
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            )
+            
+            if st.button("Đóng xem trước"):
+                del st.session_state.current_view
+                st.rerun()
 
 def handle_bot_activity():
     return
@@ -166,7 +199,7 @@ def render_comments():
                 st.rerun()
                 
         # 3. Hiển thị điểm trung bình
-        avg_rating = firebase_service.get_average_rating()
+        avg_rating = get_cached_avg_rating()
         st.caption(f"⭐ Đánh giá trung bình hiện tại: {avg_rating:.1f}/5")
 
         # --- DÁN TOÀN BỘ PHẦN COMMENT FORM VÀ DISPLAY COMMENTS CỦA BẠN VÀO ĐÂY ---
@@ -198,7 +231,7 @@ def render_comments():
                         st.rerun()
 
         # Display Comments
-        comments = firebase_service.get_cache_comments()
+        comments = get_cached_comments()
         if not comments:
             st.info("Chưa có bình luận nào. Hãy là người đầu tiên!")
         else:
@@ -564,20 +597,48 @@ def get_cached_library():
 
 def render_library():
     st.write("---")
-    st.subheader("📚 Danh mục đề tài vừa khởi tạo")
+    st.subheader("📚 Thư viện Đề cương tham khảo")
     
-    # Gọi cái hàm có cache vừa tạo ở trên
     raw_data = get_cached_library() 
     
     if not raw_data:
         st.info("Danh mục đang được cập nhật...")
         return
 
-    import pandas as pd
-    df = pd.DataFrame(raw_data)
-    
-    # Đoạn này hiển thị bảng 10 dòng đầu
-    st.table(df.head(10))
+    # Không dùng st.table hay pd.DataFrame hiển thị nữa
+    # Hiển thị tiêu đề cột bằng st.columns
+    col_h1, col_h2 = st.columns([3, 1])
+    col_h1.markdown("**Tên đề tài**")
+    col_h2.markdown("**Nội dung**")
+
+    for item in raw_data:
+        c1, c2 = st.columns([3, 1])
+        with c1:
+            st.write(item['Tên đề tài']) # Chỉ hiện tên đề tài
+        with c2:
+            # Nút Xem chi tiết thay vì hiện text dài
+            if st.button("Xem chi tiết", key=f"view_{item['id']}"):
+                st.session_state.current_view = item
+                st.rerun()
+
+    # Khi người dùng click Xem chi tiết
+    if "current_view" in st.session_state:
+        view_item = st.session_state.current_view
+        with st.expander(f"📄 Chi tiết: {view_item['Tên đề tài']}", expanded=True):
+            # Hiển thị nội dung từ cột generated_outline trên Firebase
+            st.markdown(view_item['Nội dung'])
+            
+            # Nút tải file Word từ nội dung này
+            docx_data = markdown_to_docx(view_item['Nội dung'])
+            st.download_button(
+                label="💾 Tải xuống bản Word (.docx)",
+                data=docx_data,
+                file_name=f"De_cuong_{view_item['id']}.docx",
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            )
+            if st.button("Đóng"):
+                del st.session_state.current_view
+                st.rerun()
 
 def main():
     initialize_session()
