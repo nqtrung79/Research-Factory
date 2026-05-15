@@ -191,7 +191,7 @@ def render_comments():
                 st.rerun()
                 
         # 3. Hiển thị điểm trung bình
-        avg_rating = get_cached_average_rating()
+        avg_rating = get_cached_avg_rating()
         st.caption(f"⭐ Đánh giá trung bình hiện tại: {avg_rating:.1f}/5")
 
         # --- DÁN TOÀN BỘ PHẦN COMMENT FORM VÀ DISPLAY COMMENTS CỦA BẠN VÀO ĐÂY ---
