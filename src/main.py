@@ -589,20 +589,48 @@ def get_cached_library():
 
 def render_library():
     st.write("---")
-    st.subheader("📚 Danh mục đề tài vừa khởi tạo")
+    st.subheader("📚 Thư viện Đề cương tham khảo")
     
-    # Gọi cái hàm có cache vừa tạo ở trên
     raw_data = get_cached_library() 
     
     if not raw_data:
         st.info("Danh mục đang được cập nhật...")
         return
 
-    import pandas as pd
-    df = pd.DataFrame(raw_data)
-    
-    # Đoạn này hiển thị bảng 10 dòng đầu
-    st.table(df.head(10))
+    # Không dùng st.table hay pd.DataFrame hiển thị nữa
+    # Hiển thị tiêu đề cột bằng st.columns
+    col_h1, col_h2 = st.columns([3, 1])
+    col_h1.markdown("**Tên đề tài**")
+    col_h2.markdown("**Nội dung**")
+
+    for item in raw_data:
+        c1, c2 = st.columns([3, 1])
+        with c1:
+            st.write(item['Tên đề tài']) # Chỉ hiện tên đề tài
+        with c2:
+            # Nút Xem chi tiết thay vì hiện text dài
+            if st.button("Xem chi tiết", key=f"view_{item['id']}"):
+                st.session_state.current_view = item
+                st.rerun()
+
+    # Khi người dùng click Xem chi tiết
+    if "current_view" in st.session_state:
+        view_item = st.session_state.current_view
+        with st.expander(f"📄 Chi tiết: {view_item['Tên đề tài']}", expanded=True):
+            # Hiển thị nội dung từ cột generated_outline trên Firebase
+            st.markdown(view_item['Nội dung'])
+            
+            # Nút tải file Word từ nội dung này
+            docx_data = markdown_to_docx(view_item['Nội dung'])
+            st.download_button(
+                label="💾 Tải xuống bản Word (.docx)",
+                data=docx_data,
+                file_name=f"De_cuong_{view_item['id']}.docx",
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            )
+            if st.button("Đóng"):
+                del st.session_state.current_view
+                st.rerun()
 
 def main():
     initialize_session()
