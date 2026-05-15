@@ -92,29 +92,28 @@ def render_library():
     st.write("---")
     st.subheader("📚 Thư viện Đề cương tham khảo")
     
-    raw_data = get_cached_library() # Vẫn dùng cache cũ nhưng ruột đã thay đổi
-    
+    raw_data = get_cached_library() 
     if not raw_data:
-        st.info("Danh mục đang được cập nhật...")
+        st.info("Thư viện đang được cập nhật các mẫu đề cương chất lượng...")
         return
 
-    # Tạo bảng hiển thị
+    # Hiển thị danh sách 2 cột
     for item in raw_data:
         col1, col2 = st.columns([4, 1])
         with col1:
-            st.markdown(f"**{item['Tên đề tài']}** ({item['Cấp độ']})")
+            st.markdown(f"**{item['Tên đề tài']}**")
+            st.caption(f"Cấp độ: {item['Cấp độ']}")
         with col2:
-            # Dùng key duy nhất cho mỗi nút dựa trên id của Firebase
-            if st.button("Xem đề cương", key=f"btn_{item['id']}"):
+            if st.button("Xem & Tải", key=f"lib_{item['id']}"):
                 st.session_state.current_view = item
 
-    # Nếu người dùng click "Xem", hiển thị một khu vực riêng
+    # Hiển thị khu vực xem chi tiết khi click
     if "current_view" in st.session_state:
         view_item = st.session_state.current_view
-        with st.expander(f"📄 Chi tiết: {view_item['Tên đề tài']}", expanded=True):
+        with st.expander(f"📄 Chi tiết đề cương: {view_item['Tên đề tài']}", expanded=True):
             st.markdown(view_item['Nội dung'])
             
-            # Nút tạo file Word tại chỗ
+            # Tạo file Word để tải về
             docx_data = markdown_to_docx(view_item['Nội dung'])
             st.download_button(
                 label="💾 Tải về bản Word (.docx)",
