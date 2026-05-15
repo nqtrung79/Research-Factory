@@ -93,34 +93,46 @@ def render_library():
     st.subheader("📚 Thư viện Đề cương tham khảo")
     
     raw_data = get_cached_library() 
+    
     if not raw_data:
-        st.info("Thư viện đang được cập nhật các mẫu đề cương chất lượng...")
+        st.info("Danh mục đang được cập nhật...")
         return
 
-    # Hiển thị danh sách 2 cột
+    # Hiển thị tiêu đề cột (tùy chọn)
+    col_head1, col_head2 = st.columns([4, 1])
+    with col_head1:
+        st.markdown("**Tên đề tài**")
+    with col_head2:
+        st.markdown("**Hành động**")
+
+    # Hiển thị từng dòng đề tài
     for item in raw_data:
         col1, col2 = st.columns([4, 1])
         with col1:
-            st.markdown(f"**{item['Tên đề tài']}**")
-            st.caption(f"Cấp độ: {item['Cấp độ']}")
+            # Chỉ hiển thị Tên đề tài, bỏ qua ID và Cấp độ
+            st.write(item['Tên đề tài'])
         with col2:
-            if st.button("Xem & Tải", key=f"lib_{item['id']}"):
+            # Nút bấm để xem chi tiết
+            if st.button("Xem chi tiết", key=f"view_{item['id']}"):
                 st.session_state.current_view = item
+                st.rerun()
 
-    # Hiển thị khu vực xem chi tiết khi click
+    # Phần hiển thị chi tiết khi người dùng Click
     if "current_view" in st.session_state:
         view_item = st.session_state.current_view
-        with st.expander(f"📄 Chi tiết đề cương: {view_item['Tên đề tài']}", expanded=True):
+        # Dùng st.expander hoặc st.info để hiện nội dung đề cương dài
+        with st.expander(f"📄 Nội dung chi tiết: {view_item['Tên đề tài']}", expanded=True):
             st.markdown(view_item['Nội dung'])
             
             # Tạo file Word để tải về
             docx_data = markdown_to_docx(view_item['Nội dung'])
             st.download_button(
-                label="💾 Tải về bản Word (.docx)",
+                label="💾 Tải xuống bản Word (.docx)",
                 data=docx_data,
                 file_name=f"De_cuong_{view_item['id']}.docx",
                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             )
+            
             if st.button("Đóng xem trước"):
                 del st.session_state.current_view
                 st.rerun()
