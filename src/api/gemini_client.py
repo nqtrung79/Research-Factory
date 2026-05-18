@@ -142,6 +142,11 @@ class GeminiClient:
            - Ý nghĩa khoa học/thực tiễn và các điểm trọng yếu cần lưu ý khi triển khai.
         
         Yêu cầu trình bày: Viết hoàn toàn bằng tiếng Việt (trừ tên tiếng Anh), cấu trúc tường minh, lập luận phản biện, sắc sảo.
+        CHỈ THỊ VỀ PHONG CÁCH VÀ ĐỊNH DẠNG:
+                - TUYỆT ĐỐI KHÔNG viết lời chào hỏi, kính gửi, thư ngỏ (ví dụ: "Kính gửi Quý nhà nghiên cứu...", "Thay mặt Hội đồng...", "Trân trọng...").
+                - KHÔNG tự bịa ra các lời nhận xét, đánh giá tổng quan của Hội đồng ở đầu hoặc cuối văn bản.
+                - VÀO THẲNG VẤN ĐỀ: Bắt đầu ngay lập tức bằng Tiêu đề đề tài và cấu trúc nội dung từ Mục I đến hết. 
+                - Sản phẩm xuất ra phải là một bản khung đề cương thuần túy, có tính chất học thuật, khách quan và thực chiến để người dùng copy sử dụng được ngay.
         """
         
         try:
