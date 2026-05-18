@@ -184,7 +184,7 @@ class GeminiClient:
             V. DỰ KIẾN KẾT QUẢ ĐẠT ĐƯỢC VÀ Ý NGHĨA THỰC TIỄN
             VI. KẾ HOẠCH THỰC HIỆN CHI TIẾT TỪNG THÁNG
             """
-         elif level == "Luận văn (Thạc sĩ)":
+        elif level == "Luận văn (Thạc sĩ)":
             obj_count = "3-4 mục tiêu cụ thể"
             content_count = "3-4 nội dung nghiên cứu chính"
             structure_instructions = f"""
