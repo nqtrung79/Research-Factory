@@ -342,7 +342,7 @@ class GeminiClient:
                 - Sản phẩm bắt buộc (Tiêu chuẩn khắt khe): Sản phẩm dạng I (Hệ thống/Công nghệ xử lý có thông số kỹ thuật vượt trội, cạnh tranh ngoại nhập); Sản phẩm dạng III (BẮT BUỘC có tối thiểu 1-2 bài báo quốc tế thuộc danh mục ISI/Scopus uy tín Q1/Q2 và 01 Đơn đăng ký Bằng sáng chế hoặc Giải pháp hữu ích được chấp nhận đơn).
                 - Tầm vóc: Luận giải rõ đóng góp của đề tài vào chương trình KHCN trọng điểm quốc gia hoặc giải quyết điểm nghẽn môi trường cấp bách của đất nước.
                 - Đòi hỏi lược khảo hệ thống (Systematic Review) các giải pháp/công nghệ tương đương trên thế giới, chứng minh đề tài đạt trình độ tiên tiến trong khu vực hoặc quốc tế.
-                - Khung giải pháp (Mục IV): Yêu cầu AI xuất sơ đồ khối hoặc Lưu đồ công nghệ bằng mã MERMAID.JS mô tả kiến trúc/giải pháp tổng thể của dự án.
+                
                 """
                 
                 structure_instructions = f"""
@@ -365,7 +365,6 @@ class GeminiClient:
                      + Sản phẩm dạng II: Bộ dữ liệu quốc gia, bản đồ số hóa quy mô lớn, khung chính sách/khuyến nghị được nghiệm thu.
                      + Sản phẩm dạng III: BẮT BUỘC có bài báo quốc tế thuộc danh mục ISI/Scopus (Q1/Q2), sách chuyên khảo và tối thiểu 01 Đơn đăng ký Bằng sáng chế hoặc Giải pháp hữu ích.
                 IV. NỘI DUNG, GIẢI PHÁP KỸ THUẬT VÀ KIẾN TRÚC HỆ THỐNG:
-                   - Yêu cầu AI xuất sơ đồ khối hoặc Lưu đồ công nghệ bằng mã MERMAID.JS mô tả kiến trúc giải pháp tổng thể.
                    - Phân rã tiến trình dự án thành đúng {content_count}. Thiết kế chi tiết phương pháp tiếp cận công nghệ, thiết bị chuyên dụng, quy trình thực nghiệm và kiểm định tiêu chuẩn quốc gia.
                 V. PHƯƠNG ÁN ỨNG DỤNG, CHUYỂN GIAO VÀ ĐÁNH GIÁ TÁC ĐỘNG TOÀN DIỆN:
                    - 5.1. Phương thức chuyển giao công nghệ cốt lõi, bản quyền phần mềm hoặc bản vẽ kỹ thuật.
@@ -425,7 +424,7 @@ class GeminiClient:
         
         HƯỚNG DẪN DẪN DẮT TƯ DUY (Chain of Thought):
         - Hãy kết nối biện chứng giữa Đối tượng ("{context.get('object')}") và Địa điểm ("{context.get('loc')}") để đắp nội dung thực tế cực kỳ chi tiết cho đề tài này. TUYỆT ĐỐI không viết lý thuyết suông.
-        - Tại phần Phương pháp nghiên cứu, nếu đề tài cần mô tả quy trình hệ thống hoặc thu thập dữ liệu, hãy xuất một đoạn mã sơ đồ bằng MERMAID.JS (nằm gọn trong khối ```mermaid) mô tả Lưu đồ phương pháp thực hiện.
+        
         
         QUY TẮC ĐỊNH DẠNG ĐẦU RA BẮT BUỘC (CRITICAL OUTPUT RULES):
         1. TUYỆT ĐỐI KHÔNG viết lời chào mừng, lời mở đầu sáo rỗng hoặc các câu dẫn dắt (Ví dụ: "Dưới đây là...", "Tuyệt vời!...", "Sau đây là...").
