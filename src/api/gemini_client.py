@@ -292,6 +292,13 @@ class GeminiClient:
                 project_tier = "Cấp Bộ / Cấp Tỉnh"
                 obj_count = "3-4 mục tiêu cụ thể giải quyết bài toán quy mô ngành/địa phương"
                 content_count = "3-4 nội dung lớn (phải có nội dung điều tra hiện trạng và nội dung ứng dụng kỹ thuật)"
+
+                tier_specific_instructions = """
+                - Sản phẩm bắt buộc (Mẫu B01-Thuyết minh): Định hình rõ Sản phẩm dạng I (Quy trình công nghệ xử lý/giảm thiểu, mô hình quản lý được chứng nhận), Sản phẩm dạng II (Báo cáo đánh giá hiện trạng, Bản đồ phân vùng rủi ro, Sổ tay hướng dẫn cho làng nghề), Sản phẩm dạng III (Tối thiểu 02 bài báo trên tạp chí uy tín thuộc danh mục Hội đồng Giáo sư nhà nước hoặc tạp chí chuyên ngành).
+                - Địa chỉ ứng dụng: Phải nêu rõ cơ quan tiếp nhận (Ví dụ: Sở Tài nguyên và Môi trường, Ủy ban nhân dân huyện/tỉnh nơi có làng nghề khảo sát).
+                - TẬP TRUNG vào tính cấp thiết đối với sự phát triển kinh tế - xã hội của địa phương (nếu là cấp Tỉnh) hoặc định hướng phát triển của Ngành (nếu là cấp Bộ).
+                - Đối chiếu sâu với các quy hoạch phát triển, nghị quyết hoặc chương trình hành động cốt lõi hiện hành của Bộ/Tỉnh.
+                """
                 
                 structure_instructions = f"""
                 CẤU TRÚC THUYẾT MINH ĐỀ TÀI CẤP BỘ / CẤP TỈNH (Chuẩn hóa mẫu KHCN):
@@ -319,7 +326,9 @@ class GeminiClient:
                    - 5.3. Đánh giá tác động đối với xã hội, môi trường và hiệu quả kinh tế dự kiến.
                 VI. KẾ HOẠCH TIẾN ĐỘ THỰC HIỆN (Timeline chi tiết theo từng Quý trong {duration} tháng).
                 """
-
+                CHỈ THỊ ĐẶC THÙ CHO CẤP ĐỀ TÀI:
+                {tier_specific_instructions}
+                """
             # ==========================================
             # KỊCH BẢN 2: ĐỀ TÀI CẤP NHÀ NƯỚC / QUỐC GIA
             # ==========================================
@@ -327,6 +336,13 @@ class GeminiClient:
                 project_tier = "Cấp Nhà nước / Cấp Quốc gia"
                 obj_count = "4-5 mục tiêu chiến lược, có tính tiên phong và làm chủ công nghệ tầm vĩ mô"
                 content_count = "5-6 nội dung nghiên cứu đa nhánh phức hợp từ lý thuyết đến chế tạo thử nghiệm"
+
+                tier_specific_instructions = """
+                - Sản phẩm bắt buộc (Tiêu chuẩn khắt khe): Sản phẩm dạng I (Hệ thống/Công nghệ xử lý có thông số kỹ thuật vượt trội, cạnh tranh ngoại nhập); Sản phẩm dạng III (BẮT BUỘC có tối thiểu 01-02 bài báo quốc tế thuộc danh mục ISI/Scopus uy tín Q1/Q2 và 01 Đơn đăng ký Bằng sáng chế hoặc Giải pháp hữu ích được chấp nhận đơn).
+                - Tầm vóc: Luận giải rõ đóng góp của đề tài vào chương trình KHCN trọng điểm quốc gia hoặc giải quyết điểm nghẽn môi trường cấp bách của đất nước.
+                - Đòi hỏi lược khảo hệ thống (Systematic Review) các giải pháp/công nghệ tương đương trên thế giới, chứng minh đề tài đạt trình độ tiên tiến trong khu vực hoặc quốc tế.
+                - Khung giải pháp (Mục IV): Yêu cầu AI xuất sơ đồ khối hoặc Lưu đồ công nghệ bằng mã MERMAID.JS mô tả kiến trúc/giải pháp tổng thể của dự án.
+                """
                 
                 structure_instructions = f"""
                 CẤU TRÚC THUYẾT MINH ĐỀ TÀI CẤP NHÀ NƯỚC / QUỐC GIA (Tiêu chuẩn học thuật và thực chiến tối cao):
@@ -357,7 +373,10 @@ class GeminiClient:
                    - 5.4. Đánh giá hiệu quả Kinh tế, Môi trường và đóng góp vào an ninh quốc phòng/phát triển bền vững.
                 VI. KẾ HOẠCH TIẾN ĐỘ VÀ PHÂN BỔ KHỐI LƯỢNG CHI TIẾT (Timeline phân rã theo từng Quý trong {duration} tháng).
                 """
-
+                CHỈ THỊ ĐẶC THÙ CHO CẤP ĐỀ TÀI:
+                {tier_specific_instructions}
+                """
+                
             # ==========================================
             # KỊCH BẢN 3: ĐỀ TÀI CẤP CƠ SỞ / NỘI BỘ
             # ==========================================
@@ -365,6 +384,11 @@ class GeminiClient:
                 project_tier = "Cấp Cơ sở"
                 obj_count = "2-3 mục tiêu cụ thể nhằm giải quyết trực tiếp bài toán nội bộ"
                 content_count = "2-3 nội dung thực hiện gọn gàng, có tính khả thi cao"
+
+                tier_specific_instructions = """
+                - Sản phẩm bắt buộc: Báo cáo tổng kết kỹ thuật, phần mềm/công cụ cải tiến vận hành nội bộ, quy định/quy trình nội bộ áp dụng thực tế tại đơn vị.
+                - Đơn vị ứng dụng: Triển khai trực tiếp tại các phòng, ban, phân xưởng hoặc trung tâm trực thuộc cơ sở.
+                """
                 
                 structure_instructions = f"""
                 CẤU TRÚC THUYẾT MINH ĐỀ TÀI CẤP CƠ SỞ (Tập trung thực tiễn, tinh gọn):
@@ -385,9 +409,9 @@ class GeminiClient:
                 VI. KẾ HOẠCH TIẾN ĐỘ THỰC HIỆN CHI TIẾT (Timeline phân bổ theo tháng trong {duration} tháng).
                 
             
-            CHỈ THỊ ĐẶC THÙ CHO CẤP ĐỀ TÀI:
-            {tier_specific_instructions}
-            """
+                CHỈ THỊ ĐẶC THÙ CHO CẤP ĐỀ TÀI:
+                {tier_specific_instructions}
+                """
 
         prompt = f"""
         {persona}
