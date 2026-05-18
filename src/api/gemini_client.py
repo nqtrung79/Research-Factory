@@ -326,7 +326,7 @@ class GeminiClient:
                    - 5.2. Địa chỉ ứng dụng cụ thể (Tên Sở, ban, ngành hoặc doanh nghiệp tiếp nhận thực tế).
                    - 5.3. Đánh giá tác động đối với xã hội, môi trường và hiệu quả kinh tế dự kiến.
                 VI. KẾ HOẠCH TIẾN ĐỘ THỰC HIỆN (Timeline chi tiết theo từng Quý trong {duration} tháng).
-                """
+                
                 CHỈ THỊ ĐẶC THÙ CHO CẤP ĐỀ TÀI:
                 {tier_specific_instructions}
                 """
@@ -339,7 +339,7 @@ class GeminiClient:
                 content_count = "5-6 nội dung nghiên cứu đa nhánh phức hợp từ lý thuyết đến chế tạo thử nghiệm"
 
                 tier_specific_instructions = """
-                - Sản phẩm bắt buộc (Tiêu chuẩn khắt khe): Sản phẩm dạng I (Hệ thống/Công nghệ xử lý có thông số kỹ thuật vượt trội, cạnh tranh ngoại nhập); Sản phẩm dạng III (BẮT BUỘC có tối thiểu 01-02 bài báo quốc tế thuộc danh mục ISI/Scopus uy tín Q1/Q2 và 01 Đơn đăng ký Bằng sáng chế hoặc Giải pháp hữu ích được chấp nhận đơn).
+                - Sản phẩm bắt buộc (Tiêu chuẩn khắt khe): Sản phẩm dạng I (Hệ thống/Công nghệ xử lý có thông số kỹ thuật vượt trội, cạnh tranh ngoại nhập); Sản phẩm dạng III (BẮT BUỘC có tối thiểu 1-2 bài báo quốc tế thuộc danh mục ISI/Scopus uy tín Q1/Q2 và 01 Đơn đăng ký Bằng sáng chế hoặc Giải pháp hữu ích được chấp nhận đơn).
                 - Tầm vóc: Luận giải rõ đóng góp của đề tài vào chương trình KHCN trọng điểm quốc gia hoặc giải quyết điểm nghẽn môi trường cấp bách của đất nước.
                 - Đòi hỏi lược khảo hệ thống (Systematic Review) các giải pháp/công nghệ tương đương trên thế giới, chứng minh đề tài đạt trình độ tiên tiến trong khu vực hoặc quốc tế.
                 - Khung giải pháp (Mục IV): Yêu cầu AI xuất sơ đồ khối hoặc Lưu đồ công nghệ bằng mã MERMAID.JS mô tả kiến trúc/giải pháp tổng thể của dự án.
@@ -373,7 +373,7 @@ class GeminiClient:
                    - 5.3. Đánh giá tác động sâu sắc đối với Xã hội (nâng cao chất lượng sống, an sinh cộng đồng).
                    - 5.4. Đánh giá hiệu quả Kinh tế, Môi trường và đóng góp vào an ninh quốc phòng/phát triển bền vững.
                 VI. KẾ HOẠCH TIẾN ĐỘ VÀ PHÂN BỔ KHỐI LƯỢNG CHI TIẾT (Timeline phân rã theo từng Quý trong {duration} tháng).
-                """
+                
                 CHỈ THỊ ĐẶC THÙ CHO CẤP ĐỀ TÀI:
                 {tier_specific_instructions}
                 """
