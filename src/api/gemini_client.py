@@ -162,6 +162,7 @@ class GeminiClient:
         model = self._get_model()
         level = context.get('level')
         persona = self._build_dynamic_persona(context)
+        tier_specific_instructions = ""
         
         # Khôi phục Tiered định lượng số lượng
         if level == "Khóa luận tốt nghiệp (Sinh viên)":
