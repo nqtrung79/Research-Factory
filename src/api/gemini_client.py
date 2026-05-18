@@ -280,39 +280,7 @@ class GeminiClient:
 
             VII. KẾ HOẠCH TIẾN ĐỘ THỰC HIỆN CHI TIẾT TỪNG THÁNG (Timeline chi tiết, khoa học phân bổ trong {context.get('duration')} tháng).
             """
-        
-        else: # Đề tài / Dự án KHCN (Cấp Cơ sở, Cấp Bộ/Tỉnh, Cấp Nhà nước)
-            budget_level = context.get('budget_level', '')
-            
-            # 1. Xác định phân cấp Đề tài để gán định lượng (obj_count, content_count)
-            if "Bộ" in budget_level or "Tỉnh" in budget_level:
-                project_tier = "Bộ/Tỉnh"
-                obj_count = "3-4 mục tiêu rõ ràng (giải quyết bài toán quy mô ngành hoặc địa phương)"
-                content_count = "3-4 nội dung lớn (kèm theo các giải pháp công nghệ/mô hình thực nghiệm)"
-                
-                tier_specific_instructions = """
-                - Sản phẩm bắt buộc (Mẫu B01-Thuyết minh): Định hình rõ Sản phẩm dạng I (Quy trình công nghệ xử lý/giảm thiểu, mô hình quản lý được chứng nhận), Sản phẩm dạng II (Báo cáo đánh giá hiện trạng, Bản đồ phân vùng rủi ro, Sổ tay hướng dẫn cho làng nghề), Sản phẩm dạng III (Tối thiểu 02 bài báo trên tạp chí uy tín thuộc danh mục Hội đồng Giáo sư nhà nước hoặc tạp chí chuyên ngành).
-                - Địa chỉ ứng dụng: Phải nêu rõ cơ quan tiếp nhận (Ví dụ: Sở Tài nguyên và Môi trường, Ủy ban nhân dân huyện/tỉnh nơi có làng nghề khảo sát).
-                - TẬP TRUNG vào tính cấp thiết đối với sự phát triển kinh tế - xã hội của địa phương (nếu là cấp Tỉnh) hoặc định hướng phát triển của Ngành (nếu là cấp Bộ).
-                - Đối chiếu sâu với các quy hoạch phát triển, nghị quyết hoặc chương trình hành động cốt lõi hiện hành của Bộ/Tỉnh.
-                - Yêu cầu sản phẩm (Mục III): Phải định hình rõ ràng sản phẩm loại I (Mẫu, thiết bị, quy trình công nghệ), loại II (Tiêu chuẩn, hướng dẫn, bản đồ) và loại III (Bài báo báo cáo, bài báo trên tạp chí uy tín trong nước/quốc tế).
-                - Phương án chuyển giao (Mục V): Phải chỉ rõ địa chỉ ứng dụng cụ thể (Sở, ban, ngành hoặc doanh nghiệp phối hợp).
-                """
-                
-            elif "Quốc gia" in budget_level or "Nhà nước" in budget_level or "Lớn" in budget_level:
-                project_tier = "Nhà nước/Quốc gia"
-                obj_count = "4-5 mục tiêu mang tính chiến lược (giải quyết bài toán trọng điểm tầm quốc gia)"
-                content_count = "5-6 nội dung nghiên cứu đa nhánh (gồm nghiên cứu nền tảng, thiết kế chế tạo và thử nghiệm quy mô lớn)"
-                
-                tier_specific_instructions = """
-                - Sản phẩm bắt buộc (Tiêu chuẩn khắt khe): Sản phẩm dạng I (Hệ thống/Công nghệ xử lý có thông số kỹ thuật vượt trội, cạnh tranh ngoại nhập); Sản phẩm dạng III (BẮT BUỘC có tối thiểu 01-02 bài báo quốc tế thuộc danh mục ISI/Scopus uy tín Q1/Q2 và 01 Đơn đăng ký Bằng sáng chế hoặc Giải pháp hữu ích được chấp nhận đơn).
-                - Tầm vóc: Luận giải rõ đóng góp của đề tài vào chương trình KHCN trọng điểm quốc gia hoặc giải quyết điểm nghẽn môi trường cấp bách của đất nước.
-                - TẬP TRUNG vào tầm vóc quốc gia, tính tiên phong, dẫn dắt công nghệ hoặc giải quyết điểm nghẽn chiến lược của đất nước.
-                - Đòi hỏi lược khảo hệ thống (Systematic Review) các giải pháp/công nghệ tương đương trên thế giới, chứng minh đề tài đạt trình độ tiên tiến trong khu vực hoặc quốc tế.
-                - Yêu cầu sản phẩm (Mục III) ĐẶC BIỆT KHẮT KHE: Sản phẩm loại I phải có thông số kỹ thuật rõ ràng, có khả năng cạnh tranh với hàng nhập khẩu; Sản phẩm loại III phải bắt buộc có bài báo ISI/Scopus (chỉ rõ số lượng dự kiến) và Bằng sáng chế/Giải pháp hữu ích.
-                - Khung giải pháp (Mục IV): Yêu cầu AI xuất sơ đồ khối hoặc Lưu đồ công nghệ bằng mã MERMAID.JS mô tả kiến trúc/giải pháp tổng thể của dự án.
-                """
-                
+
         else: # Đề tài / Dự án KHCN (Phân cấp Form động: Cấp Cơ sở, Cấp Bộ/Tỉnh, Cấp Nhà nước)
             budget_level = context.get('budget_level', '')
             duration = context.get('duration', 12)
