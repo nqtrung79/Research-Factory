@@ -2,7 +2,7 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from loguru import logger
 import uuid
 import streamlit as st
@@ -42,26 +42,63 @@ class FirebaseService:
             self.db = None
 
     def get_library_data(self):
+        from difflib import SequenceMatcher  # Import công cụ đo độ giống nhau của chữ
+        
         try:
             if self.db is None: return []
-            # Lấy 10 bản ghi chất lượng nhất
-            docs = self.db.collection("user_journeys").order_by("timestamp", direction="DESCENDING").limit(20).stream()
+            
+            # Lấy dữ liệu mốc 1 ngày trước
+            one_day_ago = datetime.utcnow() - timedelta(days=1)
+            
+            # Lấy 50 bản ghi (giữ nguyên gốc của bạn)
+            docs = self.db.collection("user_journeys")\
+                .where("timestamp", "<=", one_day_ago)\
+                .order_by("timestamp", direction="DESCENDING")\
+                .limit(50).stream()
+                
             data = []
+            
             for doc in docs:
                 d = doc.to_dict()
                 outline = d.get("generated_outline", "")
                 
-                # Điều kiện: Có nội dung và không phải nội dung báo lỗi
-                if len(outline) > 500 and "Lỗi" not in outline[:50]:
-                    data.append({
-                        "id": doc.id,
-                        "Tên đề tài": d.get("topic") or d.get("user_input", {}).get("existing_title", "N/A"),
-                        "Nội dung": outline # Đây chính là cột generated_outline
-                    })
+                # Lấy tên đề tài và làm sạch
+                topic_name = d.get("topic") or d.get("user_input", {}).get("existing_title", "")
+                topic_name = topic_name.strip()
+                
+                # Đếm số lượng từ
+                word_count = len(topic_name.split())
+                
+                # --- BỘ LỌC ĐIỀU KIỆN CŨ CỦA BẠN ---
+                if len(outline) > 500 and "Lỗi" not in outline[:50] and word_count > 15:
+                    
+                    # --- THUẬT TOÁN CHỐNG TRÙNG LẶP THÔNG MINH ---
+                    is_duplicate = False
+                    
+                    # So sánh tên đề tài đang xét với những tên đề tài ĐÃ ĐƯỢC CHẤP NHẬN ở phía trước
+                    for existing_item in data:
+                        # Tính toán độ tương đồng (trả về kết quả từ 0.0 đến 1.0)
+                        similarity = SequenceMatcher(None, topic_name.lower(), existing_item["Tên đề tài"].lower()).ratio()
+                        
+                        # Nếu giống nhau trên 85%, coi như là bản sao trùng lặp và chặn lại
+                        if similarity > 0.85:
+                            is_duplicate = True
+                            break
+                    
+                    # Nếu KHÔNG TRÙNG thì mới thêm vào danh sách hiển thị
+                    if not is_duplicate:
+                        data.append({
+                            "id": doc.id,
+                            "Tên đề tài": topic_name,
+                            "Nội dung": outline 
+                        })
+                
+                # Vẫn giữ nguyên giới hạn lấy đúng 10 đề cương chất lượng nhất
                 if len(data) >= 10: break
+                
             return data
         except Exception as e:
-            logger.error(f"Lỗi: {e}")
+            logger.error(f"Lỗi lọc trùng thư viện: {e}")
             return []
     
     def add_comment(self, email, name, content, parent_id=None, is_bot=False):
