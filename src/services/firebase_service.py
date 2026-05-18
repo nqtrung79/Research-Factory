@@ -41,24 +41,39 @@ class FirebaseService:
             logger.error(f"❌ Lỗi khởi tạo Firebase: {e}")
             self.db = None
 
-    def get_library_data(self):
+def get_library_data(self):
         try:
             if self.db is None: return []
-            # Lấy 10 bản ghi chất lượng nhất
-            docs = self.db.collection("user_journeys").order_by("timestamp", direction="DESCENDING").limit(20).stream()
+            
+            # 1. Tăng giới hạn lên 50 để đào sâu hơn, tránh bị hụt đề tài do người dùng tạo lỗi gần đây
+            docs = self.db.collection("user_journeys").order_by("timestamp", direction="DESCENDING").limit(50).stream()
             data = []
+            
             for doc in docs:
                 d = doc.to_dict()
                 outline = d.get("generated_outline", "")
                 
-                # Điều kiện: Có nội dung và không phải nội dung báo lỗi
-                if len(outline) > 500 and "Lỗi" not in outline[:50]:
+                # Lấy tên đề tài từ các nguồn có sẵn
+                topic_name = d.get("topic") or d.get("user_input", {}).get("existing_title", "")
+                topic_name = topic_name.strip() # Xóa khoảng trắng thừa ở đầu/cuối
+                
+                # Đếm số lượng từ (tách nhau bằng khoảng trắng)
+                word_count = len(topic_name.split())
+                
+                # 2. ĐIỀU KIỆN LỌC MỚI:
+                # - Độ dài đề cương > 500 ký tự
+                # - Không chứa chữ "Lỗi" ở đầu nội dung
+                # - Tên đề tài phải có TRÊN 15 TỪ (chữ)
+                if len(outline) > 500 and "Lỗi" not in outline[:50] and word_count > 15:
                     data.append({
                         "id": doc.id,
-                        "Tên đề tài": d.get("topic") or d.get("user_input", {}).get("existing_title", "N/A"),
-                        "Nội dung": outline # Đây chính là cột generated_outline
+                        "Tên đề tài": topic_name,
+                        "Nội dung": outline 
                     })
+                
+                # Chỉ lấy tối đa 10 đề cương chất lượng nhất để hiển thị
                 if len(data) >= 10: break
+                
             return data
         except Exception as e:
             logger.error(f"Lỗi: {e}")
