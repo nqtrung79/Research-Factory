@@ -508,26 +508,34 @@ def render_results():
                 use_container_width=True # Thêm cái này để nút bấm to rõ hơn trên điện thoại
             )
  
-    with tab_literature:
-        st.write("### 📜 Tài liệu tham khảo đề xuất")
-        level = res['params']['level']
+with tab_literature:
+    st.write("### 📜 Tài liệu tham khảo đề xuất (Chuẩn APA)")
+    level = res['params']['level']
+    
+    if not res.get('literature'): # Dùng .get() để an toàn hơn
+        st.info("Không tìm thấy tài liệu phù hợp trực tiếp qua API.")
+    else:
+        # Giữ nguyên phần thông báo level của bạn
+        if level == ResearchLevel.UNDERGRADUATE.value:
+            st.warning("Ưu tiên các tài liệu liên quan nhất:")
+        # ... (các elif khác của bạn)
         
-        if not res['literature']:
-            st.info("Không tìm thấy tài liệu phù hợp trực tiếp qua API.")
-        else:
-            if level == ResearchLevel.UNDERGRADUATE.value:
-                st.warning("Ưu tiên bài tiếng Việt (nếu tìm thấy). Dưới đây là các tài liệu liên quan nhất:")
-            elif level == ResearchLevel.MASTER.value:
-                st.info("Danh mục gồm 3 bài tiếng Việt và 2 bài tiếng Anh (nếu có).")
-            elif level == ResearchLevel.PHD.value:
-                st.info("Danh mục tập trung vào các tài liệu tiếng Anh để phân tích Research Gap.")
+        for p in res['literature']:
+            # Chuẩn bị tên tác giả: "Họ, Tên."
+            authors = ", ".join(p['authors']) if isinstance(p['authors'], list) else p['authors']
             
-            for p in res['literature']:
-                with st.expander(f"📖 {p['title']} ({p['year']})"):
-                    st.write(f"**Tác giả:** {', '.join(p['authors'])}")
-                    st.write(f"**DOI:** {p['doi']}")
-                    st.write(f"**Abstract:** {p['abstract'][:1000]}...")
-                    st.link_button("Xem chi tiết", p['url'])
+            # Định dạng APA: Tác giả (Năm). Tên bài báo. URL/DOI.
+            apa_format = f"**{authors} ({p['year']}). {p['title']}.**"
+            
+            with st.expander(f"📖 {p['title'][:60]}..."):
+                st.markdown(apa_format)
+                if p['doi']:
+                    st.write(f"🔗 **DOI:** [https://doi.org/{p['doi']}](https://doi.org/{p['doi']})")
+                else:
+                    st.write(f"🔗 **URL:** {p['url']}")
+                
+                st.write(f"**Abstract:** {p['abstract'][:500]}...")
+                st.link_button("Xem chi tiết", p['url'])
                     
     with tab_nlp:
         st.json(res['nlp'])
