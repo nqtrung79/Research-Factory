@@ -1,35 +1,58 @@
 import streamlit as st
 from semanticscholar import SemanticScholar
 from loguru import logger
+from sumy.parsers.plaintext import PlaintextParser
+from sumy.nlp.tokenizers import Tokenizer
+from sumy.summarizers.lsa import LsaSummarizer
 
 s2 = SemanticScholar()
 
+def get_summary(text, level):
+    """Tóm tắt abstract dựa trên cấp bậc nghiên cứu"""
+    if not text or text == "No abstract available.":
+        return text
+    
+    # Định nghĩa số câu tóm tắt dựa trên cấp bậc
+    # Càng cao cấp, càng giữ nhiều câu để tránh mất thông tin
+    sentences_map = {"Undergraduate": 1, "Master": 2, "PhD": 3}
+    count = sentences_map.get(level, 2)
+    
+    try:
+        parser = PlaintextParser.from_string(text, Tokenizer("english"))
+        summarizer = LsaSummarizer()
+        summary = summarizer(parser.document, count)
+        return " ".join([str(s) for s in summary])
+    except:
+        return text[:300] + "..." # Fallback nếu lỗi
+
 @st.cache_data(ttl=3600)
-def get_s2_results(query, limit):
+def get_s2_results(query, limit, level):
     logger.info(f"Searching S2: {query} with limit {limit}")
     try:
-        # Giới hạn số lượng tài liệu theo đúng limit truyền vào
         papers = s2.search_paper(
-            query, 
-            limit=limit, 
+            query, limit=limit, 
             fields=['title', 'authors', 'year', 'abstract', 'url', 'doi']
         )
-        return [{
-            "title": p.title or "No Title",
-            "authors": [a.name for a in p.authors] if p.authors else [],
-            "year": p.year or 0,
-            "abstract": p.abstract or "No abstract available.",
-            "doi": p.doi or "",
-            "url": p.url or "",
-            "source": "Semantic Scholar"
-        } for p in papers]
+        results = []
+        for p in papers:
+            # Tóm tắt abstract ngay khi lấy về
+            abstract = p.abstract or "No abstract available."
+            results.append({
+                "title": p.title or "No Title",
+                "authors": [a.name for a in p.authors] if p.authors else [],
+                "year": p.year or 0,
+                "abstract": get_summary(abstract, level), # Đã tóm tắt!
+                "doi": p.doi or "",
+                "url": p.url or "",
+                "source": "Semantic Scholar"
+            })
+        return results
     except Exception as e:
-        logger.error(f"Semantic Scholar Error: {e}")
+        logger.error(f"S2 Error: {e}")
         return []
 
 class SemanticSearcher:
-    # Không cần limit mặc định là 5 ở đây nữa, hãy để nó lấy từ main.py
-    def search(self, query: str, limit: int):
-        return get_s2_results(query, limit)
+    def search(self, query: str, limit: int, level: str):
+        return get_s2_results(query, limit, level)
 
 searcher = SemanticSearcher()
