@@ -18,7 +18,7 @@ from api.key_manager import key_manager
 from nlp.vietnamese_processor import process_and_translate
 from models.research_models import ResearchLevel, ProjectBudget
 from search.crossref_search import crossref_searcher
-from semantic_search import searcher
+from search.semantic_search import searcher
 from search.duckduckgo_search import duckduckgo_searcher
 from api.gemini_client import gemini_client
 from utils.pdf_processor import extract_abstract_from_pdf
