@@ -8,6 +8,7 @@ deep-translator
 
 # Search & API Integration
 duckduckgo-search
+semanticscholar
 habanero
 requests
 
