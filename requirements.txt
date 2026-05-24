@@ -3,6 +3,7 @@ streamlit
 python-dotenv
 
 # NLP & Language Processing
+sumy
 underthesea
 deep-translator
 
